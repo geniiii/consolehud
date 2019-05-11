@@ -174,18 +174,18 @@ public class RenderSelectedItem extends InGameHud {
 	@Environment(EnvType.CLIENT)
 	private List<String> getTooltip(PlayerEntity playerIn, ItemStack stack) {
 		List<String> list = Lists.newArrayList();
-		String s = stack.getDisplayName().getFormattedText();
+		String itemName = stack.getDisplayName().getFormattedText();
 
-		/*if (stack.hasDisplayName()) {
-			s = ChatFormat.ITALIC + s;
+		if (stack.hasDisplayName()) {
+			itemName = ChatFormat.ITALIC + itemName;
 		}
 
 		if (!stack.hasDisplayName() && stack.getItem() == Items.FILLED_MAP) {
-			s = s + " #" + stack.getDamage();
+			itemName = itemName + " #" + stack.getDamage();
 		}
 
-		s = s + ChatFormat.RESET;
-		list.add(s);*/
+		itemName = itemName + ChatFormat.RESET;
+		list.add(itemName);
 
 		List<Component> textComponentList = Lists.newArrayList();
 		stack.getItem().buildTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
@@ -194,8 +194,8 @@ public class RenderSelectedItem extends InGameHud {
 		if (stack.hasTag()) {
 			ListTag enchantmentListTag = stack.getEnchantmentList();
 
-			for (int tagIndex = 0; tagIndex < enchantmentListTag.size(); ++tagIndex) {
-				CompoundTag compoundTag = enchantmentListTag.getCompoundTag(tagIndex);
+			enchantmentListTag.forEach(tag -> {
+				CompoundTag compoundTag = (CompoundTag) tag;
 				String id = compoundTag.getString("id");
 				int lvl = compoundTag.getShort("lvl");
 				Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(id));
@@ -203,7 +203,7 @@ public class RenderSelectedItem extends InGameHud {
 				if (enchantment != null) {
 					list.add(enchantment.getTextComponent(lvl).getFormattedText());
 				}
-			}
+			});
 
 			if (stack.getTag() != null && stack.getTag().containsKey("display", 10)) {
 				CompoundTag compoundTag = stack.getTag().getCompound("display");
