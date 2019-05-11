@@ -83,53 +83,56 @@ public class RenderPaperDoll {
 	 * Draws an entity on the screen looking toward the cursor.
 	 */
 	private void drawEntityOnScreen(int posX, int posY, int scale, ClientPlayerEntity playerEntity, float partialTicks) {
-		GlStateManager.enableDepthTest();
-		GlStateManager.enableColorMaterial();
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((float) posX, (float) posY, 50.0F);
-		GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
-		GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-
-		float f = playerEntity.field_6283;
-		float f1 = playerEntity.yaw;
-		float f2 = playerEntity.pitch;
-		float f3 = playerEntity.prevHeadYaw;
-		float f4 = playerEntity.headYaw;
-
-		GlStateManager.rotatef(135.0F, 0.0F, 1.0F, 0.0F);
-		GuiLighting.enable();
-		GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(-((float) Math.atan((double) (40 / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-
-		this.rotateEntity(playerEntity.field_6283 - renderYawOffsetPrev, partialTicks);
-		renderYawOffsetPrev = playerEntity.field_6283;
-		playerEntity.field_6283 = rotationYawPrev;
-		playerEntity.headYaw = rotationYawPrev;
-
-		GlStateManager.translatef(0.0F, 0.0F, 0.0F);
 		EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderManager();
-		entityRenderDispatcher.method_3945(180.0F);
 
-		entityRenderDispatcher.setRenderShadows(false);
-		entityRenderDispatcher.render(playerEntity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-		entityRenderDispatcher.setRenderShadows(true);
+		if (entityRenderDispatcher.camera != null) {
+			GlStateManager.enableDepthTest();
+			GlStateManager.enableColorMaterial();
+			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			GlStateManager.pushMatrix();
+			GlStateManager.translatef((float) posX, (float) posY, 50.0F);
+			GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
+			GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 
-		playerEntity.field_6283 = f;
-		playerEntity.yaw = f1;
-		playerEntity.pitch = f2;
-		playerEntity.prevHeadYaw = f3;
-		playerEntity.headYaw = f4;
+			float f = playerEntity.field_6283;
+			float f1 = playerEntity.yaw;
+			float f2 = playerEntity.pitch;
+			float f3 = playerEntity.prevHeadYaw;
+			float f4 = playerEntity.headYaw;
 
-		GlStateManager.popMatrix();
-		GuiLighting.disable();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-		GlStateManager.disableTexture();
-		GlStateManager.activeTexture(GLX.GL_TEXTURE0);
-		GlStateManager.disableDepthTest();
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+			GlStateManager.rotatef(135.0F, 0.0F, 1.0F, 0.0F);
+			GuiLighting.enable();
+			GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotatef(-((float) Math.atan((double) (40 / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+
+			this.rotateEntity(playerEntity.field_6283 - renderYawOffsetPrev, partialTicks);
+			renderYawOffsetPrev = playerEntity.field_6283;
+			playerEntity.field_6283 = rotationYawPrev;
+			playerEntity.headYaw = rotationYawPrev;
+
+			GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+			entityRenderDispatcher.method_3945(180.0F);
+
+			entityRenderDispatcher.setRenderShadows(false);
+			entityRenderDispatcher.render(playerEntity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+			entityRenderDispatcher.setRenderShadows(true);
+
+			playerEntity.field_6283 = f;
+			playerEntity.yaw = f1;
+			playerEntity.pitch = f2;
+			playerEntity.prevHeadYaw = f3;
+			playerEntity.headYaw = f4;
+
+			GlStateManager.popMatrix();
+			GuiLighting.disable();
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.activeTexture(GLX.GL_TEXTURE1);
+			GlStateManager.disableTexture();
+			GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+			GlStateManager.disableDepthTest();
+			GlStateManager.enableBlend();
+			GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		}
 	}
 
 	/**

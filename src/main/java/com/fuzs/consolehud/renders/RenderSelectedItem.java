@@ -148,7 +148,7 @@ public class RenderSelectedItem extends InGameHud {
 				list.set(i, stack.getRarity().formatting + list.get(i));
 			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
 				list.set(i, ChatFormat.GRAY + "..." + ChatFormat.RESET);
-			} else if (!stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
+			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
 				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
 			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
 				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);

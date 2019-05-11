@@ -1,5 +1,6 @@
 package com.fuzs.consolehud.util;
 
+@SuppressWarnings("unused")
 public enum PaperDollPosition {
 	TOP_LEFT,
 	BOTTOM_LEFT,
