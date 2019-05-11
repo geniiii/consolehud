@@ -17,12 +17,18 @@
 		"entrypoints": {
 				"client": [
 						"com.fuzs.consolehud.ConsoleHud"
+				],
+				"modmenu": [
+						"com.fuzs.consolehud.ConsoleHudMenuApiImpl"
 				]
 		},
 		"mixins": [
 				"consolehud.mixins.json"
 		],
 		"requires": {
-				"fabricloader": ">=0.4.0"
+				"fabricloader": ">=0.4.0",
+				"fabric": "*",
+				"autoconfig1": ">=1.0.0",
+				"cloth-config": ">=0.2.1"
 		}
 }

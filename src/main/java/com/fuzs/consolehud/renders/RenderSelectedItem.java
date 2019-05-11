@@ -36,7 +36,7 @@ public class RenderSelectedItem extends InGameHud {
 		this.client = mcIn;
 	}
 
-	public void onClientTick() {
+	public void registerOnClientTickEvent() {
 		ClientTickCallback.EVENT.register(
 			event -> {
 				if (!ConsoleHud.CONFIG.heldItemTooltips || this.client.isPaused())
@@ -46,16 +46,16 @@ public class RenderSelectedItem extends InGameHud {
 					ItemStack itemstack = this.client.player.inventory.getMainHandStack();
 
 					if (itemstack.isEmpty()) {
-						((IngameHudAccessorMixin)this).setHeldItemTooltipFade(0);
-					} else if (!((IngameHudAccessorMixin)this).getCurrentStack().isEmpty() && itemstack.getItem() == ((IngameHudAccessorMixin)this).getCurrentStack().getItem() && ItemStack.areEqual(itemstack, ((IngameHudAccessorMixin)this).getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == ((IngameHudAccessorMixin)this).getCurrentStack().getDamage())) {
-						if (((IngameHudAccessorMixin)this).getHeldItemTooltipFade() > 0) {
-							((IngameHudAccessorMixin)this).setHeldItemTooltipFade(((IngameHudAccessorMixin)this).getHeldItemTooltipFade() - 1);
+						((IngameHudAccessorMixin) this).setHeldItemTooltipFade(0);
+					} else if (!((IngameHudAccessorMixin) this).getCurrentStack().isEmpty() && itemstack.getItem() == ((IngameHudAccessorMixin) this).getCurrentStack().getItem() && ItemStack.areEqual(itemstack, ((IngameHudAccessorMixin) this).getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == ((IngameHudAccessorMixin) this).getCurrentStack().getDamage())) {
+						if (((IngameHudAccessorMixin) this).getHeldItemTooltipFade() > 0) {
+							((IngameHudAccessorMixin) this).setHeldItemTooltipFade(((IngameHudAccessorMixin) this).getHeldItemTooltipFade() - 1);
 						}
 					} else {
-						((IngameHudAccessorMixin)this).setHeldItemTooltipFade(40);
+						((IngameHudAccessorMixin) this).setHeldItemTooltipFade(40);
 					}
 
-					((IngameHudAccessorMixin)this).setCurrentStack(itemstack);
+					((IngameHudAccessorMixin) this).setCurrentStack(itemstack);
 				}
 			}
 		);
@@ -67,8 +67,8 @@ public class RenderSelectedItem extends InGameHud {
 			return;
 		}
 
-		Identifier resource = Registry.ITEM.getId(((IngameHudAccessorMixin)this).getCurrentStack().getItem());
-		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.heldItemTooltipsBlacklist);
+		Identifier resource = Registry.ITEM.getId(((IngameHudAccessorMixin) this).getCurrentStack().getItem());
+		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsBlacklist);
 		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
 
 		if (flag) {
@@ -76,24 +76,18 @@ public class RenderSelectedItem extends InGameHud {
 			return;
 		}
 
-		if (((IngameHudAccessorMixin)this).getHeldItemTooltipFade() > 0 && !((IngameHudAccessorMixin)this).getCurrentStack().isEmpty()) {
+		if (((IngameHudAccessorMixin) this).getHeldItemTooltipFade() > 0 && !((IngameHudAccessorMixin) this).getCurrentStack().isEmpty()) {
+			int tooltipXPosition = this.client.window.getScaledWidth() / 2;
+			tooltipXPosition += ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsXOffset % tooltipXPosition;
 
-			String s = ((IngameHudAccessorMixin)this).getCurrentStack().getDisplayName().getText();
-
-			if (((IngameHudAccessorMixin)this).getCurrentStack().hasDisplayName()) {
-				s = ChatFormat.ITALIC + s;
-			}
-
-			int i = this.client.window.getScaledWidth() / 2;
-			i += ConsoleHud.CONFIG.heldItemTooltipsXOffset % i;
-			int j = this.client.window.getScaledHeight();
-			j -= ConsoleHud.CONFIG.heldItemTooltipsYOffset % j;
+			int tooltipYPosition = this.client.window.getScaledHeight();
+			tooltipYPosition -= ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsYOffset % tooltipYPosition;
 
 			if (!this.client.interactionManager.hasStatusBars()) {
-				j += 14;
+				tooltipYPosition += 14;
 			}
 
-			int k = (int) ((float) ((IngameHudAccessorMixin)this).getHeldItemTooltipFade() * 256.0F / 10.0F);
+			int k = (int) ((float) ((IngameHudAccessorMixin) this).getHeldItemTooltipFade() * 256.0F / 10.0F);
 
 			if (k > 255) {
 				k = 255;
@@ -102,25 +96,22 @@ public class RenderSelectedItem extends InGameHud {
 			if (k > 0) {
 				GlStateManager.pushMatrix();
 				GlStateManager.enableBlend();
-				List<String> textLines = getToolTipColour(((IngameHudAccessorMixin)this).getCurrentStack());
+				List<String> textLines = getToolTipColour(((IngameHudAccessorMixin) this).getCurrentStack());
 				int listsize = textLines.size();
 
-				if (listsize > ConsoleHud.CONFIG.heldItemTooltipsRows) {
-					listsize = ConsoleHud.CONFIG.heldItemTooltipsRows;
+				if (listsize > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
+					listsize = ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows;
 				}
-				if (listsize > 2) {
-					this.client.player.sendMessage(new TextComponent(""));
-				}
-				j -= listsize > 1 ? (listsize - 1) * 10 + 2 : (listsize - 1) * 10;
+				tooltipYPosition -= listsize > 1 ? (listsize - 1) * 10 + 2 : (listsize - 1) * 10;
 
 				for (int k1 = 0; k1 < listsize; ++k1) {
-					drawCenteredString(textLines.get(k1), (float) i, (float) j, k << 24);
+					drawCenteredString(textLines.get(k1), (float) tooltipXPosition, (float) tooltipYPosition, k << 24);
 
 					if (k1 == 0) {
-						j += 2;
+						tooltipYPosition += 2;
 					}
 
-					j += 10;
+					tooltipYPosition += 10;
 				}
 				GlStateManager.disableBlend();
 				GlStateManager.popMatrix();
@@ -155,12 +146,12 @@ public class RenderSelectedItem extends InGameHud {
 		for (int i = 0; i < list.size(); ++i) {
 			if (i == 0) {
 				list.set(i, stack.getRarity().formatting + list.get(i));
-			} else if (i == ConsoleHud.CONFIG.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.heldItemTooltipsRows && ConsoleHud.CONFIG.heldItemTooltipsDots) {
+			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
 				list.set(i, ChatFormat.GRAY + "..." + ChatFormat.RESET);
-			} else if (!stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.heldItemTooltipsRows - 1) {
-				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
-			} else if (i == ConsoleHud.CONFIG.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.heldItemTooltipsRows) {
-				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);
+			} else if (!stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
+				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
+			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
+				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);
 			} else {
 				list.set(i, ChatFormat.GRAY + list.get(i) + ChatFormat.RESET);
 			}
@@ -214,31 +205,31 @@ public class RenderSelectedItem extends InGameHud {
 		stack.getItem().buildTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
 
 		if (stack.hasTag()) {
-			ListTag nbttaglist = stack.getEnchantmentList();
+			ListTag enchantmentListTag = stack.getEnchantmentList();
 
-			for (int j = 0; j < nbttaglist.size(); ++j) {
-				CompoundTag nbttagcompound = nbttaglist.getCompoundTag(j);
-				String k = nbttagcompound.getString("id");
-				int l = nbttagcompound.getShort("lvl");
-				Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(k));
+			for (int tagIndex = 0; tagIndex < enchantmentListTag.size(); ++tagIndex) {
+				CompoundTag compoundTag = enchantmentListTag.getCompoundTag(tagIndex);
+				String id = compoundTag.getString("id");
+				int lvl = compoundTag.getShort("lvl");
+				Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(id));
 
 				if (enchantment != null) {
-					list.add(enchantment.getTextComponent(l).getFormattedText());
+					list.add(enchantment.getTextComponent(lvl).getFormattedText());
 				}
 			}
 
 			if (stack.getTag() != null && stack.getTag().containsKey("display", 10)) {
-				CompoundTag nbttagcompound1 = stack.getTag().getCompound("display");
+				CompoundTag compoundTag = stack.getTag().getCompound("display");
 
-				if (nbttagcompound1.containsKey("color", 3)) {
+				if (compoundTag.containsKey("color", 3)) {
 					list.add(ChatFormat.ITALIC + new TranslatableComponent("item.dyed").getFormattedText());
 				}
 
-				if (nbttagcompound1.getType("Lore") == 9) {
-					ListTag nbttaglist3 = nbttagcompound1.getList("Lore", 8);
+				if (compoundTag.getType("Lore") == 9) {
+					ListTag loreListTag = compoundTag.getList("Lore", 8);
 
-					if (!nbttaglist3.isEmpty()) {
-						for (Tag tag : nbttaglist3) {
+					if (!loreListTag.isEmpty()) {
+						for (Tag tag : loreListTag) {
 							list.add(ChatFormat.DARK_PURPLE + "" + ChatFormat.ITALIC + tag);
 						}
 					}
