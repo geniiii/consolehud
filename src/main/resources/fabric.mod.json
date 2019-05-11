@@ -8,9 +8,9 @@
 				"geni"
 		],
 		"contact": {
-				"homepage": "https://polgarian.life",
-				"sources": "https://github.com/polgaria/ConsoleHUD",
-				"issues": "https://github.com/polgaria/ConsoleHUD/issues"
+				"homepage": "https://minecraft.curseforge.com/projects/console-hud",
+				"sources": "https://github.com/Fuzss/consolehud/",
+				"issues": "https://github.com/Fuzss/consolehud//issues"
 		},
 		"license": "Unlicense",
 		"environment": "client",
