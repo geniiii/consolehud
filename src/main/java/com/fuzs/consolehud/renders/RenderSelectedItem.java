@@ -39,10 +39,7 @@ public class RenderSelectedItem extends InGameHud {
 	public void registerOnClientTickEvent() {
 		ClientTickCallback.EVENT.register(
 			event -> {
-				if (!ConsoleHud.CONFIG.heldItemTooltips || this.client.isPaused())
-					return;
-
-				if (this.client.player != null) {
+				if (this.client.player != null && ConsoleHud.CONFIG.heldItemTooltips && !this.client.isPaused()) {
 					ItemStack itemstack = this.client.player.inventory.getMainHandStack();
 
 					if (itemstack.isEmpty()) {

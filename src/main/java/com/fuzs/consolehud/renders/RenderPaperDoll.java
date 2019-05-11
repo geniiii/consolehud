@@ -26,7 +26,7 @@ public class RenderPaperDoll {
 	public void registerOnClientTickEvent() {
 		ClientTickCallback.EVENT.register(
 			event -> {
-				if (this.minecraft.player != null && this.minecraft.isPaused() || !ConsoleHud.CONFIG.paperDoll) {
+				if (this.minecraft.player != null && !this.minecraft.isPaused() && ConsoleHud.CONFIG.paperDoll) {
 					boolean sprinting = minecraft.player.isSprinting() && ConsoleHud.CONFIG.paperDollConfig.paperDollSprinting;
 					boolean crouching = minecraft.player.isSneaking() && remainingRidingTicks == 0 && ConsoleHud.CONFIG.paperDollConfig.paperDollCrouching;
 					boolean flying = minecraft.player.abilities.flying && ConsoleHud.CONFIG.paperDollConfig.paperDollFlying;
