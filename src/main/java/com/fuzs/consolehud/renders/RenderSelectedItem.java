@@ -1,279 +1,250 @@
 package com.fuzs.consolehud.renders;
 
-import com.fuzs.consolehud.ConfigHandler;
+import com.fuzs.consolehud.ConsoleHud;
+import com.fuzs.consolehud.mixin.client.IngameHudAccessorMixin;
 import com.google.common.collect.Lists;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiIngame;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.util.ITooltipFlag;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;
+import net.minecraft.ChatFormat;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemShulkerBox;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-public class RenderSelectedItem extends GuiIngame {
+public class RenderSelectedItem extends InGameHud {
 
-    public RenderSelectedItem(Minecraft mcIn) {
-        super(mcIn);
-    }
+	private final MinecraftClient client;
 
-    @SubscribeEvent
-    public void onClientTick(TickEvent.ClientTickEvent event) {
+	public RenderSelectedItem(MinecraftClient mcIn) {
+		super(mcIn);
 
-        if (!ConfigHandler.heldItemTooltips || this.mc.isGamePaused() || event.phase != TickEvent.Phase.END)
-            return;
+		this.client = mcIn;
+	}
 
-        if (this.mc.player != null)
-        {
-            ItemStack itemstack = this.mc.player.inventory.getCurrentItem();
+	public void onClientTick() {
+		ClientTickCallback.EVENT.register(
+			event -> {
+				if (!ConsoleHud.CONFIG.heldItemTooltips || this.client.isPaused())
+					return;
 
-            if (itemstack.isEmpty())
-            {
-                this.remainingHighlightTicks = 0;
-            }
-            else if (!this.highlightingItemStack.isEmpty() && itemstack.getItem() == this.highlightingItemStack.getItem() && ItemStack.areItemStackTagsEqual(itemstack, this.highlightingItemStack) && (itemstack.isItemStackDamageable() || itemstack.getMetadata() == this.highlightingItemStack.getMetadata()))
-            {
-                if (this.remainingHighlightTicks > 0)
-                {
-                    --this.remainingHighlightTicks;
-                }
-            }
-            else
-            {
-                this.remainingHighlightTicks = 40;
-            }
+				if (this.client.player != null) {
+					ItemStack itemstack = this.client.player.inventory.getMainHandStack();
 
-            this.highlightingItemStack = itemstack;
-        }
+					if (itemstack.isEmpty()) {
+						((IngameHudAccessorMixin)this).setHeldItemTooltipFade(0);
+					} else if (!((IngameHudAccessorMixin)this).getCurrentStack().isEmpty() && itemstack.getItem() == ((IngameHudAccessorMixin)this).getCurrentStack().getItem() && ItemStack.areEqual(itemstack, ((IngameHudAccessorMixin)this).getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == ((IngameHudAccessorMixin)this).getCurrentStack().getDamage())) {
+						if (((IngameHudAccessorMixin)this).getHeldItemTooltipFade() > 0) {
+							((IngameHudAccessorMixin)this).setHeldItemTooltipFade(((IngameHudAccessorMixin)this).getHeldItemTooltipFade() - 1);
+						}
+					} else {
+						((IngameHudAccessorMixin)this).setHeldItemTooltipFade(40);
+					}
 
-    }
+					((IngameHudAccessorMixin)this).setCurrentStack(itemstack);
+				}
+			}
+		);
+	}
 
-    @SubscribeEvent
-    public void renderGameOverlayText(RenderGameOverlayEvent.Pre event) {
+	public void renderGameOverlayText() {
+		if (this.client.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
+			client.options.heldItemTooltips = true;
+			return;
+		}
 
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
+		Identifier resource = Registry.ITEM.getId(((IngameHudAccessorMixin)this).getCurrentStack().getItem());
+		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.heldItemTooltipsBlacklist);
+		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
 
-        if (this.mc.playerController.isSpectator() || !ConfigHandler.heldItemTooltips) {
-            mc.gameSettings.heldItemTooltips = true;
-            return;
-        }
+		if (flag) {
+			client.options.heldItemTooltips = true;
+			return;
+		}
 
-        ResourceLocation resource = Item.REGISTRY.getNameForObject(this.highlightingItemStack.getItem());
-        List<String> blacklist = Lists.newArrayList(ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsBlacklist);
-        boolean flag = resource != null && (blacklist.contains(resource.toString()) || blacklist.contains(resource.getResourceDomain()));
+		if (((IngameHudAccessorMixin)this).getHeldItemTooltipFade() > 0 && !((IngameHudAccessorMixin)this).getCurrentStack().isEmpty()) {
 
-        if (flag) {
-            mc.gameSettings.heldItemTooltips = true;
-            return;
-        }
+			String s = ((IngameHudAccessorMixin)this).getCurrentStack().getDisplayName().getText();
 
-        if (this.remainingHighlightTicks > 0 && !this.highlightingItemStack.isEmpty())
-        {
+			if (((IngameHudAccessorMixin)this).getCurrentStack().hasDisplayName()) {
+				s = ChatFormat.ITALIC + s;
+			}
 
-            String s = this.highlightingItemStack.getDisplayName();
+			int i = this.client.window.getScaledWidth() / 2;
+			i += ConsoleHud.CONFIG.heldItemTooltipsXOffset % i;
+			int j = this.client.window.getScaledHeight();
+			j -= ConsoleHud.CONFIG.heldItemTooltipsYOffset % j;
 
-            if (this.highlightingItemStack.hasDisplayName())
-            {
-                s = TextFormatting.ITALIC + s;
-            }
+			if (!this.client.interactionManager.hasStatusBars()) {
+				j += 14;
+			}
 
-            int i = event.getResolution().getScaledWidth() / 2;
-            i += ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsXOffset % i;
-            int j = event.getResolution().getScaledHeight();
-            j -= ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsYOffset % j;
+			int k = (int) ((float) ((IngameHudAccessorMixin)this).getHeldItemTooltipFade() * 256.0F / 10.0F);
 
-            if (!this.mc.playerController.shouldDrawHUD())
-            {
-                j += 14;
-            }
+			if (k > 255) {
+				k = 255;
+			}
 
-            int k = (int)((float)this.remainingHighlightTicks * 256.0F / 10.0F);
+			if (k > 0) {
+				GlStateManager.pushMatrix();
+				GlStateManager.enableBlend();
+				List<String> textLines = getToolTipColour(((IngameHudAccessorMixin)this).getCurrentStack());
+				int listsize = textLines.size();
 
-            if (k > 255)
-            {
-                k = 255;
-            }
+				if (listsize > ConsoleHud.CONFIG.heldItemTooltipsRows) {
+					listsize = ConsoleHud.CONFIG.heldItemTooltipsRows;
+				}
+				if (listsize > 2) {
+					this.client.player.sendMessage(new TextComponent(""));
+				}
+				j -= listsize > 1 ? (listsize - 1) * 10 + 2 : (listsize - 1) * 10;
 
-            if (k > 0)
-            {
-                GlStateManager.pushMatrix();
-                GlStateManager.enableBlend();
-                List<String> textLines = getToolTipColour(this.highlightingItemStack);
-                int listsize = textLines.size();
+				for (int k1 = 0; k1 < listsize; ++k1) {
+					drawCenteredString(textLines.get(k1), (float) i, (float) j, k << 24);
 
-                if (listsize > ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows) {
-                    listsize = ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows;
-                }
-                if (listsize > 2) {
-                    this.mc.player.sendStatusMessage(new TextComponentString(""), true);
-                }
-                j -= listsize > 1 ? (listsize - 1) * 10 + 2 : (listsize - 1) * 10;
+					if (k1 == 0) {
+						j += 2;
+					}
 
-                for (int k1 = 0; k1 < listsize; ++k1)
-                {
-                    drawCenteredString(textLines.get(k1), (float) i, (float) j, k << 24);
+					j += 10;
+				}
+				GlStateManager.disableBlend();
+				GlStateManager.popMatrix();
+				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			}
 
-                    if (k1 == 0)
-                    {
-                        j += 2;
-                    }
+		}
 
-                    j += 10;
-                }
-                GlStateManager.disableBlend();
-                GlStateManager.popMatrix();
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
+		this.client.options.heldItemTooltips = false;
 
-        }
+	}
 
-        mc.gameSettings.heldItemTooltips = false;
+	/**
+	 * Removes empty lines from a list of strings
+	 */
+	private List<String> removeEmptyLines(List<String> list) {
+		for (int k1 = 0; k1 < list.size(); ++k1) {
+			if (list.get(k1).isEmpty()) {
+				list.remove(k1);
+			}
+		}
+		return list;
+	}
 
-    }
+	/**
+	 * Colours first line in a list of strings according to its rarity, other lines that don't have a colour assigned
+	 * will be coloured grey
+	 */
+	private List<String> getToolTipColour(ItemStack stack) {
+		List<String> list = removeEmptyLines(getTooltip(this.client.player, stack));
 
-    /**
-     * Removes empty lines from a list of strings
-     */
-    private List<String> removeEmptyLines(List<String> list) {
-        for (int k1 = 0; k1 < list.size(); ++k1)
-        {
-            if (list.get(k1).isEmpty()) {
-                list.remove(k1);
-            }
-        }
-        return list;
-    }
+		for (int i = 0; i < list.size(); ++i) {
+			if (i == 0) {
+				list.set(i, stack.getRarity().formatting + list.get(i));
+			} else if (i == ConsoleHud.CONFIG.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.heldItemTooltipsRows && ConsoleHud.CONFIG.heldItemTooltipsDots) {
+				list.set(i, ChatFormat.GRAY + "..." + ChatFormat.RESET);
+			} else if (!stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.heldItemTooltipsRows - 1) {
+				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
+			} else if (i == ConsoleHud.CONFIG.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.heldItemTooltipsRows) {
+				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);
+			} else {
+				list.set(i, ChatFormat.GRAY + list.get(i) + ChatFormat.RESET);
+			}
+		}
 
-    /**
-     * Colours first line in a list of strings according to its rarity, other lines that don't have a colour assigned
-     * will be coloured grey
-     */
-    private List<String> getToolTipColour(ItemStack stack) {
-        List<String> list = removeEmptyLines(getTooltip(this.mc.player, stack));
+		return list;
+	}
 
-        for (int i = 0; i < list.size(); ++i)
-        {
-            if (i == 0) {
-                list.set(i, stack.getRarity().rarityColor + list.get(i));
-            } else if (i == ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows - 1 && list.size() > ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows && ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsDots) {
-                list.set(i, TextFormatting.GRAY + "..." + TextFormatting.RESET);
-            } else if (stack.getItem() instanceof ItemShulkerBox && list.size() == 7 && i == ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows - 1) {
-                list.set(i, TextFormatting.GRAY + "" + TextFormatting.ITALIC + TextFormatting.getTextWithoutFormattingCodes(new TextComponentTranslation("container.shulkerBox.more", list.size() - ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + TextFormatting.RESET);
-            } else if (i == ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows - 1 && list.size() > ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows) {
-                list.set(i, TextFormatting.GRAY + "" + TextFormatting.ITALIC + TextFormatting.getTextWithoutFormattingCodes(new TextComponentTranslation("container.shulkerBox.more", list.size() - ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsRows + 1).getFormattedText()) + TextFormatting.RESET);
-            } else {
-                list.set(i, TextFormatting.GRAY + list.get(i) + TextFormatting.RESET);
-            }
-        }
+	/**
+	 * Returns the contents of the textbox as float
+	 */
+	private int getShulkerBoxExcess(String line) {
+		line = line.replaceAll("[^0-9]", "");
+		if (line.isEmpty()) {
+			line = "0";
+		}
+		return Integer.valueOf(line);
+	}
 
-        return list;
-    }
+	/**
+	 * Renders the specified text to the screen, center-aligned. Args : renderer, string, x, y, color
+	 */
+	private void drawCenteredString(String text, float x, float y, int color) {
+		this.getFontRenderer().drawWithShadow(text, (x - this.getFontRenderer().getStringWidth(text) / 2F), y, color);
+	}
 
-    /**
-     * Returns the contents of the textbox as float
-     */
-    private int getShulkerBoxExcess(String line) {
-        line = line.replaceAll("[^0-9]","");
-        if (line.isEmpty()) {
-            line = "0";
-        }
-        return Integer.valueOf(line);
-    }
+	/**
+	 * Return a list of strings containing information about the item
+	 */
+	@Environment(EnvType.CLIENT)
+	private List<String> getTooltip(PlayerEntity playerIn, ItemStack stack) {
+		List<String> list = Lists.newArrayList();
+		String s = stack.getDisplayName().getText();
 
-    /**
-     * Renders the specified text to the screen, center-aligned. Args : renderer, string, x, y, color
-     */
-    private void drawCenteredString(String text, float x, float y, int color)
-    {
-        this.getFontRenderer().drawStringWithShadow(text, (x - this.getFontRenderer().getStringWidth(text) / 2), y, color);
-    }
+		if (stack.hasDisplayName()) {
+			s = ChatFormat.ITALIC + s;
+		}
 
-    /**
-     * Return a list of strings containing information about the item
-     */
-    @SideOnly(Side.CLIENT)
-    private List<String> getTooltip(@Nullable EntityPlayer playerIn, ItemStack stack)
-    {
-        List<String> list = Lists.<String>newArrayList();
-        String s = stack.getDisplayName();
+		if (!stack.hasDisplayName() && stack.getItem() == Items.FILLED_MAP) {
+			s = s + " #" + stack.getDamage();
+		}
 
-        if (stack.hasDisplayName())
-        {
-            s = TextFormatting.ITALIC + s;
-        }
+		s = s + ChatFormat.RESET;
 
-        if (!stack.hasDisplayName() && stack.getItem() == Items.FILLED_MAP)
-        {
-            s = s + " #" + stack.getItemDamage();
-        }
+		list.add(s);
+		List<Component> textComponentList = Lists.newArrayList();
+		for (String string : list) {
+			textComponentList.add(new TextComponent(string));
+		}
 
-        s = s + TextFormatting.RESET;
+		stack.getItem().buildTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
 
-        list.add(s);
+		if (stack.hasTag()) {
+			ListTag nbttaglist = stack.getEnchantmentList();
 
-        stack.getItem().addInformation(stack, playerIn == null ? null : playerIn.world, list, ITooltipFlag.TooltipFlags.NORMAL);
+			for (int j = 0; j < nbttaglist.size(); ++j) {
+				CompoundTag nbttagcompound = nbttaglist.getCompoundTag(j);
+				String k = nbttagcompound.getString("id");
+				int l = nbttagcompound.getShort("lvl");
+				Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(k));
 
-        if (stack.hasTagCompound())
-        {
-            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+				if (enchantment != null) {
+					list.add(enchantment.getTextComponent(l).getFormattedText());
+				}
+			}
 
-            for (int j = 0; j < nbttaglist.tagCount(); ++j)
-            {
-                NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(j);
-                int k = nbttagcompound.getShort("id");
-                int l = nbttagcompound.getShort("lvl");
-                Enchantment enchantment = Enchantment.getEnchantmentByID(k);
+			if (stack.getTag() != null && stack.getTag().containsKey("display", 10)) {
+				CompoundTag nbttagcompound1 = stack.getTag().getCompound("display");
 
-                if (enchantment != null)
-                {
-                    list.add(enchantment.getTranslatedName(l));
-                }
-            }
+				if (nbttagcompound1.containsKey("color", 3)) {
+					list.add(ChatFormat.ITALIC + new TranslatableComponent("item.dyed").getFormattedText());
+				}
 
-            if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("display", 10))
-            {
-                NBTTagCompound nbttagcompound1 = stack.getTagCompound().getCompoundTag("display");
+				if (nbttagcompound1.getType("Lore") == 9) {
+					ListTag nbttaglist3 = nbttagcompound1.getList("Lore", 8);
 
-                if (nbttagcompound1.hasKey("color", 3))
-                {
-                    list.add(TextFormatting.ITALIC + new TextComponentTranslation("item.dyed").getFormattedText());
-                }
-
-                if (nbttagcompound1.getTagId("Lore") == 9)
-                {
-                    NBTTagList nbttaglist3 = nbttagcompound1.getTagList("Lore", 8);
-
-                    if (!nbttaglist3.hasNoTags())
-                    {
-                        for (int l1 = 0; l1 < nbttaglist3.tagCount(); ++l1)
-                        {
-                            list.add(TextFormatting.DARK_PURPLE + "" + TextFormatting.ITALIC + nbttaglist3.getStringTagAt(l1));
-                        }
-                    }
-                }
-            }
-        }
-        if (ConfigHandler.heldItemTooltipsConfig.heldItemTooltipsModded) {
-            net.minecraftforge.event.ForgeEventFactory.onItemTooltip(stack, playerIn, list, ITooltipFlag.TooltipFlags.NORMAL);
-        }
-        return list;
-    }
+					if (!nbttaglist3.isEmpty()) {
+						for (Tag tag : nbttaglist3) {
+							list.add(ChatFormat.DARK_PURPLE + "" + ChatFormat.ITALIC + tag);
+						}
+					}
+				}
+			}
+		}
+		return list;
+	}
 }

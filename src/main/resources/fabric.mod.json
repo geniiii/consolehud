@@ -1,0 +1,28 @@
+{
+		"schemaVersion": 1,
+		"id": "consolehud",
+		"version": "${version}",
+		"name": "ConsoleHUD",
+		"authors": [
+				"fuzs",
+				"geni"
+		],
+		"contact": {
+				"homepage": "https://polgarian.life",
+				"sources": "https://github.com/polgaria/ConsoleHUD",
+				"issues": "https://github.com/polgaria/ConsoleHUD/issues"
+		},
+		"license": "Unlicense",
+		"environment": "client",
+		"entrypoints": {
+				"client": [
+						"com.fuzs.consolehud.ConsoleHud"
+				]
+		},
+		"mixins": [
+				"consolehud.mixins.json"
+		],
+		"requires": {
+				"fabricloader": ">=0.4.0"
+		}
+}

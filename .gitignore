@@ -1,68 +1,19 @@
-### Java ###
-*.class
+# gradle
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+.gradle/
+build/
+out/
 
-# Package Files
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+# idea
 
-# Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
-### Eclipse ###
-bin
-eclipse
-*.launch
-.settings
-.metadata
-.classpath
-.project
-
-### IntelliJ IDEA ###
-out
-classes
+.idea/
+*.iml
 *.ipr
 *.iws
-*.iml
-.idea
 
-### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-nbactions.xml
-.nb-gradle/
-.nb-gradle-properties
+# fabric
 
-### Gradle ###
-build
-.gradle
+run/
 
-# Ignore Gradle GUI config
-gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Cache of project
-.gradletasknamecache
-
-### Other ###
-run
-.DS_Store
-*.txt
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
+# other
+loc.exe
