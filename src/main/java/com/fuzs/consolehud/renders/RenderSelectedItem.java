@@ -102,7 +102,7 @@ public class RenderSelectedItem extends InGameHud {
 				tooltipYPosition -= listsize > 1 ? (listsize - 1) * 10 + 2 : (listsize - 1) * 10;
 
 				for (int k1 = 0; k1 < listsize; ++k1) {
-					drawCenteredString(textLines.get(k1), (float) tooltipXPosition, (float) tooltipYPosition, k << 24);
+					this.drawCenteredString(this.getFontRenderer(), textLines.get(k1), tooltipXPosition, tooltipYPosition, k << 24);
 
 					if (k1 == 0) {
 						tooltipYPosition += 2;
@@ -169,21 +169,14 @@ public class RenderSelectedItem extends InGameHud {
 	}
 
 	/**
-	 * Renders the specified text to the screen, center-aligned. Args : renderer, string, x, y, color
-	 */
-	private void drawCenteredString(String text, float x, float y, int color) {
-		this.getFontRenderer().drawWithShadow(text, (x - this.getFontRenderer().getStringWidth(text) / 2F), y, color);
-	}
-
-	/**
 	 * Return a list of strings containing information about the item
 	 */
 	@Environment(EnvType.CLIENT)
 	private List<String> getTooltip(PlayerEntity playerIn, ItemStack stack) {
 		List<String> list = Lists.newArrayList();
-		String s = stack.getDisplayName().getText();
+		String s = stack.getDisplayName().getFormattedText();
 
-		if (stack.hasDisplayName()) {
+		/*if (stack.hasDisplayName()) {
 			s = ChatFormat.ITALIC + s;
 		}
 
@@ -192,14 +185,11 @@ public class RenderSelectedItem extends InGameHud {
 		}
 
 		s = s + ChatFormat.RESET;
+		list.add(s);*/
 
-		list.add(s);
 		List<Component> textComponentList = Lists.newArrayList();
-		for (String string : list) {
-			textComponentList.add(new TextComponent(string));
-		}
-
 		stack.getItem().buildTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
+		textComponentList.forEach(component -> list.add(component.getFormattedText()));
 
 		if (stack.hasTag()) {
 			ListTag enchantmentListTag = stack.getEnchantmentList();
