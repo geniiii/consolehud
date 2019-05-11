@@ -14,13 +14,15 @@ public class ModConfig implements ConfigData {
 	@Comment("Shows a small player model in a configurable corner of the screen while the player is sprinting, sneaking, or flying.")
 	public boolean paperDoll = true;
 
-	@ConfigEntry.Gui.CollapsibleObject
+	@ConfigEntry.Category("selected_item")
+	@ConfigEntry.Gui.TransitiveObject
 	public SelectedItemConfig selectedItemConfig = new SelectedItemConfig();
 
-	@ConfigEntry.Gui.CollapsibleObject
+	@ConfigEntry.Category("paper_doll")
+	@ConfigEntry.Gui.TransitiveObject
 	public PaperDollConfig paperDollConfig = new PaperDollConfig();
 
-	public static class SelectedItemConfig {
+	public static class SelectedItemConfig implements ConfigData {
 		@Comment("Disables held item tooltips for specified items and mods, mainly to prevent custom tooltips from overlapping.")
 		public String[] heldItemTooltipsBlacklist = new String[]{};
 
