@@ -19,7 +19,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -29,6 +28,7 @@ import java.util.List;
 public class RenderSelectedItem extends InGameHud {
 
 	private final MinecraftClient client;
+	private final IngameHudAccessorMixin mixin = (IngameHudAccessorMixin) this;
 
 	public RenderSelectedItem(MinecraftClient mcIn) {
 		super(mcIn);
@@ -43,16 +43,16 @@ public class RenderSelectedItem extends InGameHud {
 					ItemStack itemstack = this.client.player.inventory.getMainHandStack();
 
 					if (itemstack.isEmpty()) {
-						((IngameHudAccessorMixin) this).setHeldItemTooltipFade(0);
-					} else if (!((IngameHudAccessorMixin) this).getCurrentStack().isEmpty() && itemstack.getItem() == ((IngameHudAccessorMixin) this).getCurrentStack().getItem() && ItemStack.areEqual(itemstack, ((IngameHudAccessorMixin) this).getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == ((IngameHudAccessorMixin) this).getCurrentStack().getDamage())) {
-						if (((IngameHudAccessorMixin) this).getHeldItemTooltipFade() > 0) {
-							((IngameHudAccessorMixin) this).setHeldItemTooltipFade(((IngameHudAccessorMixin) this).getHeldItemTooltipFade() - 1);
+						this.mixin.setHeldItemTooltipFade(0);
+					} else if (!this.mixin.getCurrentStack().isEmpty() && itemstack.getItem() == this.mixin.getCurrentStack().getItem() && ItemStack.areEqual(itemstack, this.mixin.getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == this.mixin.getCurrentStack().getDamage())) {
+						if (this.mixin.getHeldItemTooltipFade() > 0) {
+							this.mixin.setHeldItemTooltipFade(this.mixin.getHeldItemTooltipFade() - 1);
 						}
 					} else {
-						((IngameHudAccessorMixin) this).setHeldItemTooltipFade(40);
+						this.mixin.setHeldItemTooltipFade(40);
 					}
 
-					((IngameHudAccessorMixin) this).setCurrentStack(itemstack);
+					this.mixin.setCurrentStack(itemstack);
 				}
 			}
 		);
@@ -60,20 +60,20 @@ public class RenderSelectedItem extends InGameHud {
 
 	public void renderGameOverlayText() {
 		if (this.client.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
-			client.options.heldItemTooltips = true;
+			this.client.options.heldItemTooltips = true;
 			return;
 		}
 
-		Identifier resource = Registry.ITEM.getId(((IngameHudAccessorMixin) this).getCurrentStack().getItem());
+		Identifier resource = Registry.ITEM.getId(this.mixin.getCurrentStack().getItem());
 		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsBlacklist);
 		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
 
 		if (flag) {
-			client.options.heldItemTooltips = true;
+			this.client.options.heldItemTooltips = true;
 			return;
 		}
 
-		if (((IngameHudAccessorMixin) this).getHeldItemTooltipFade() > 0 && !((IngameHudAccessorMixin) this).getCurrentStack().isEmpty()) {
+		if (this.mixin.getHeldItemTooltipFade() > 0 && !this.mixin.getCurrentStack().isEmpty()) {
 			int tooltipXPosition = this.client.window.getScaledWidth() / 2;
 			tooltipXPosition += ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsXOffset % tooltipXPosition;
 
@@ -84,7 +84,7 @@ public class RenderSelectedItem extends InGameHud {
 				tooltipYPosition += 14;
 			}
 
-			int k = (int) ((float) ((IngameHudAccessorMixin) this).getHeldItemTooltipFade() * 256.0F / 10.0F);
+			int k = (this.mixin.getHeldItemTooltipFade() * 256 / 10);
 
 			if (k > 255) {
 				k = 255;
@@ -93,18 +93,18 @@ public class RenderSelectedItem extends InGameHud {
 			if (k > 0) {
 				GlStateManager.pushMatrix();
 				GlStateManager.enableBlend();
-				List<String> textLines = getToolTipColour(((IngameHudAccessorMixin) this).getCurrentStack());
-				int listsize = textLines.size();
+				List<String> textLines = getToolTipColour(this.mixin.getCurrentStack());
+				int listSize = textLines.size();
 
-				if (listsize > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
-					listsize = ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows;
+				if (listSize > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
+					listSize = ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows;
 				}
-				tooltipYPosition -= listsize > 1 ? (listsize - 1) * 10 + 2 : (listsize - 1) * 10;
+				tooltipYPosition -= listSize > 1 ? (listSize - 1) * 10 + 2 : (listSize - 1) * 10;
 
-				for (int k1 = 0; k1 < listsize; ++k1) {
-					this.drawCenteredString(this.getFontRenderer(), textLines.get(k1), tooltipXPosition, tooltipYPosition, k << 24);
+				for (int lineIndex = 0; lineIndex < listSize; ++lineIndex) {
+					this.drawCenteredString(this.getFontRenderer(), textLines.get(lineIndex), tooltipXPosition, tooltipYPosition, k << 24);
 
-					if (k1 == 0) {
+					if (lineIndex == 0) {
 						tooltipYPosition += 2;
 					}
 
@@ -125,11 +125,8 @@ public class RenderSelectedItem extends InGameHud {
 	 * Removes empty lines from a list of strings
 	 */
 	private List<String> removeEmptyLines(List<String> list) {
-		for (int k1 = 0; k1 < list.size(); ++k1) {
-			if (list.get(k1).isEmpty()) {
-				list.remove(k1);
-			}
-		}
+		list.forEach(line -> list.removeIf(String::isEmpty));
+
 		return list;
 	}
 
@@ -205,7 +202,10 @@ public class RenderSelectedItem extends InGameHud {
 				}
 			});
 
-			if (stack.getTag() != null && stack.getTag().containsKey("display", 10)) {
+
+			// hasTag() already ensures that it's not null
+			// noinspection ConstantConditions
+			if (stack.getTag().containsKey("display", 10)) {
 				CompoundTag compoundTag = stack.getTag().getCompound("display");
 
 				if (compoundTag.containsKey("color", 3)) {

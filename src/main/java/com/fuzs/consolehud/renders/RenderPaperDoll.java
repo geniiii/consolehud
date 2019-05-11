@@ -27,12 +27,12 @@ public class RenderPaperDoll {
 		ClientTickCallback.EVENT.register(
 			event -> {
 				if (this.minecraft.player != null && !this.minecraft.isPaused() && ConsoleHud.CONFIG.paperDoll) {
-					boolean sprinting = minecraft.player.isSprinting() && ConsoleHud.CONFIG.paperDollConfig.paperDollSprinting;
-					boolean crouching = minecraft.player.isSneaking() && remainingRidingTicks == 0 && ConsoleHud.CONFIG.paperDollConfig.paperDollCrouching;
-					boolean flying = minecraft.player.abilities.flying && ConsoleHud.CONFIG.paperDollConfig.paperDollFlying;
-					boolean elytra = minecraft.player.isFallFlying() && ConsoleHud.CONFIG.paperDollConfig.paperDollElytraFlying;
-					boolean burning = minecraft.player.isOnFire() && ConsoleHud.CONFIG.paperDollConfig.paperDollBurning;
-					boolean mounting = minecraft.player.isRiding() && ConsoleHud.CONFIG.paperDollConfig.paperDollRiding;
+					final boolean sprinting = minecraft.player.isSprinting() && ConsoleHud.CONFIG.paperDollConfig.paperDollSprinting;
+					final boolean crouching = minecraft.player.isSneaking() && remainingRidingTicks == 0 && ConsoleHud.CONFIG.paperDollConfig.paperDollCrouching;
+					final boolean flying = minecraft.player.abilities.flying && ConsoleHud.CONFIG.paperDollConfig.paperDollFlying;
+					final boolean elytra = minecraft.player.isFallFlying() && ConsoleHud.CONFIG.paperDollConfig.paperDollElytraFlying;
+					final boolean burning = minecraft.player.isOnFire() && ConsoleHud.CONFIG.paperDollConfig.paperDollBurning;
+					final boolean mounting = minecraft.player.isRiding() && ConsoleHud.CONFIG.paperDollConfig.paperDollRiding;
 
 					if (ConsoleHud.CONFIG.paperDollConfig.paperDollAlways || crouching || sprinting || burning || elytra || flying || mounting) {
 						remainingTicks = 20;
