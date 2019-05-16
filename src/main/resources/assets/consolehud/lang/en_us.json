@@ -23,5 +23,6 @@
 		"text.autoconfig.consolehud.option.paperDollConfig.paperDollFlying": "Display when flying",
 		"text.autoconfig.consolehud.option.paperDollConfig.paperDollElytraFlying": "Display when flying with an elytra",
 		"text.autoconfig.consolehud.option.paperDollConfig.paperDollBurning": "Display when burning",
-		"text.autoconfig.consolehud.option.paperDollConfig.paperDollRiding": "Display when riding an entity"
+		"text.autoconfig.consolehud.option.paperDollConfig.paperDollRiding": "Display when riding an entity",
+		"text.autoconfig.consolehud.option.paperDollConfig.paperDollSwimmingPose": "Display when in the swimming pose (e.g. crawling, swimming)"
 }

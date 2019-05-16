@@ -33,8 +33,9 @@ public class RenderPaperDoll {
 					final boolean elytra = minecraft.player.isFallFlying() && ConsoleHud.CONFIG.paperDollConfig.paperDollElytraFlying;
 					final boolean burning = minecraft.player.isOnFire() && ConsoleHud.CONFIG.paperDollConfig.paperDollBurning;
 					final boolean mounting = minecraft.player.isRiding() && ConsoleHud.CONFIG.paperDollConfig.paperDollRiding;
+					final boolean swimmingPose = minecraft.player.isInSwimmingPose() && ConsoleHud.CONFIG.paperDollConfig.paperDollSwimmingPose;
 
-					if (ConsoleHud.CONFIG.paperDollConfig.paperDollAlways || crouching || sprinting || burning || elytra || flying || mounting) {
+					if (ConsoleHud.CONFIG.paperDollConfig.paperDollAlways || crouching || sprinting || burning || elytra || flying || mounting || swimmingPose) {
 						remainingTicks = 20;
 					} else if (remainingTicks > 0) {
 						remainingTicks--;

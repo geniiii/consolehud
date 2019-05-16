@@ -69,10 +69,13 @@ public class ModConfig implements ConfigData {
 		@Comment("Shows the paper doll while the player is flying with an elytra.")
 		public boolean paperDollElytraFlying = true;
 
-		@Comment("Disables flame overlay on the hud when on fire and displays the burning paper doll instead.")
+		@Comment("Disables flame overlay on the HUD when on fire and displays the burning paper doll instead.")
 		public boolean paperDollBurning = false;
 
 		@Comment("Shows the paper doll while the player is riding any entity.")
 		public boolean paperDollRiding = false;
+
+		@Comment("Shows the paper doll while the player is in the swimming pose (e.g. crawling, swimming).")
+		public boolean paperDollSwimmingPose = true;
 	}
 }
