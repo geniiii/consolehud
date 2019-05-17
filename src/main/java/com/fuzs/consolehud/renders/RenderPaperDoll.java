@@ -47,7 +47,7 @@ public class RenderPaperDoll implements ConsoleHudRender {
 
 	private void renderGameOverlayText(float partialTicks) {
 		if (ConsoleHud.CLIENT.player != null && ConsoleHud.CONFIG.paperDoll) {
-			positionOnScreen = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? 22.5F : -22.5F;
+			positionOnScreen = ConsoleHud.CONFIG.paperDollConfig.position.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? 22.5F : -22.5F;
 			if (!ConsoleHud.CLIENT.player.isInvisible() && !ConsoleHud.CLIENT.player.isSpectator() && (!ConsoleHud.CLIENT.player.isRiding() || ConsoleHud.CONFIG.paperDollConfig.riding || ConsoleHud.CONFIG.paperDollConfig.always) && remainingTicks > 0) {
 				if (!wasActive) {
 					rotationYawPrev = positionOnScreen;
@@ -55,7 +55,7 @@ public class RenderPaperDoll implements ConsoleHudRender {
 					wasActive = true;
 				}
 
-				int scale = ConsoleHud.CONFIG.paperDollConfig.paperDollScale * 5;
+				int scale = ConsoleHud.CONFIG.paperDollConfig.scale * 5;
 				int positionScale = (int) (scale * 1.5F);
 
 				int scaledWidth = ConsoleHud.CLIENT.window.getScaledWidth();
@@ -64,8 +64,8 @@ public class RenderPaperDoll implements ConsoleHudRender {
 				int xMargin = ConsoleHud.CONFIG.paperDollConfig.xOffset / (int) ConsoleHud.CLIENT.window.getScaleFactor();
 				int yMargin = ConsoleHud.CONFIG.paperDollConfig.yOffset / (int) ConsoleHud.CLIENT.window.getScaleFactor();
 
-				int x = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? scaledWidth - positionScale - xMargin : positionScale + xMargin;
-				int y = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() % 2 == 0 ? (int) (scale * 2.5F) + yMargin : scaledHeight - positionScale - yMargin;
+				int x = ConsoleHud.CONFIG.paperDollConfig.position.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? scaledWidth - positionScale - xMargin : positionScale + xMargin;
+				int y = ConsoleHud.CONFIG.paperDollConfig.position.ordinal() % 2 == 0 ? (int) (scale * 2.5F) + yMargin : scaledHeight - positionScale - yMargin;
 
 				this.drawEntityOnScreen((x % scaledWidth + scaledWidth) % scaledWidth, (y % scaledHeight + scaledWidth) % scaledWidth, scale, ConsoleHud.CLIENT.player, partialTicks);
 			} else if (wasActive) {

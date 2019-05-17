@@ -14,7 +14,7 @@ public class ModConfig implements ConfigData {
 	@Comment("Shows a small player model in a configurable corner of the screen while the player is sprinting, sneaking, or flying.")
 	public boolean paperDoll = true;
 
-	@Comment("Enables the hotbar to hover anywhere on the screen. By default just moves it up a little from the screen bottom.")
+	@Comment("Enables the hotbar to hover anywhere on the screen. By default, it moves it up 18px from its original position.")
 	public boolean hoveringHotbar = true;
 
 	@ConfigEntry.Category("selected_item")
@@ -31,7 +31,7 @@ public class ModConfig implements ConfigData {
 
 	public static class SelectedItemConfig implements ConfigData {
 		@Comment("Disables held item tooltips for specified items and mods, mainly to prevent custom tooltips from overlapping.")
-		public String[] heldItemTooltipsBlacklist = new String[]{};
+		public String[] blacklist = new String[]{};
 
 		@ConfigEntry.BoundedDiscrete(min = 2, max = 7)
 		@Comment("Maximum amount of rows to be displayed for held item tooltips.")
@@ -49,11 +49,11 @@ public class ModConfig implements ConfigData {
 
 	public static class PaperDollConfig {
 		@Comment("Defines a screen corner to display the paper doll in.")
-		public PaperDollPosition paperDollPosition = PaperDollPosition.TOP_LEFT;
+		public PaperDollPosition position = PaperDollPosition.TOP_LEFT;
 
 		@ConfigEntry.BoundedDiscrete(min = 1, max = 24)
 		@Comment("Scale of the paper doll. This is additionally adjusted by the GUI Scale option in Video Settings.")
-		public int paperDollScale = 4;
+		public int scale = 4;
 
 		@Comment("Offset on x-axis from original doll position.")
 		public int xOffset = 0;

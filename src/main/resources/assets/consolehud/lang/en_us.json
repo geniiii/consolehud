@@ -4,10 +4,12 @@
 		"text.autoconfig.consolehud.category.default": "General",
 		"text.autoconfig.consolehud.category.selected_item": "Held Item Tooltips",
 		"text.autoconfig.consolehud.category.paper_doll": "Paper Doll",
+		"text.autoconfig.consolehud.category.hovering_hotbar": "Hovering Hotbar",
 
 		"text.autoconfig.consolehud.option.heldItemTooltips": "Held Item Tooltips",
 		"text.autoconfig.consolehud.option.paperDoll": "Paper Doll",
-		
+		"text.autoconfig.consolehud.option.hoveringHotbar": "Hovering Hotbar",
+
 		"text.autoconfig.consolehud.option.selectedItemConfig.rows": "Rows",
 		"text.autoconfig.consolehud.option.selectedItemConfig.xOffset": "X-Offset",
 		"text.autoconfig.consolehud.option.selectedItemConfig.yOffset": "Y-Offset",
@@ -24,5 +26,8 @@
 		"text.autoconfig.consolehud.option.paperDollConfig.elytraFlying": "Display when flying with an elytra",
 		"text.autoconfig.consolehud.option.paperDollConfig.burning": "Display when burning",
 		"text.autoconfig.consolehud.option.paperDollConfig.riding": "Display when riding an entity",
-		"text.autoconfig.consolehud.option.paperDollConfig.swimmingPose": "Display when in the swimming pose (e.g. crawling, swimming)"
+		"text.autoconfig.consolehud.option.paperDollConfig.swimmingPose": "Display when in the swimming pose (e.g. crawling, swimming)",
+
+		"text.autoconfig.consolehud.option.hoveringHotbarConfig.xOffset": "X-Offset",
+		"text.autoconfig.consolehud.option.hoveringHotbarConfig.yOffset": "Y-Offset"
 }

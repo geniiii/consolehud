@@ -65,7 +65,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 		}
 
 		Identifier resource = Registry.ITEM.getId(this.mixin.getCurrentStack().getItem());
-		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsBlacklist);
+		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.blacklist);
 		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
 
 		if (flag) {
