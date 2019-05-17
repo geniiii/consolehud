@@ -1,0 +1,12 @@
+{
+		"required": true,
+		"package": "site.geni.renderevents.mixin",
+		"compatibilityLevel": "JAVA_8",
+		"client": [
+				"client.InGameHudDrawMixin"
+		],
+		"minVersion": "0.7.11",
+		"injectors": {
+				"defaultRequire": 1
+		}
+}

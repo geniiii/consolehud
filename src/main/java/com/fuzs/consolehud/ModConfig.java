@@ -14,6 +14,9 @@ public class ModConfig implements ConfigData {
 	@Comment("Shows a small player model in a configurable corner of the screen while the player is sprinting, sneaking, or flying.")
 	public boolean paperDoll = true;
 
+	@Comment("Enables the hotbar to hover anywhere on the screen. By default just moves it up a little from the screen bottom.")
+	public boolean hoveringHotbar = true;
+
 	@ConfigEntry.Category("selected_item")
 	@ConfigEntry.Gui.TransitiveObject
 	public SelectedItemConfig selectedItemConfig = new SelectedItemConfig();
@@ -22,22 +25,26 @@ public class ModConfig implements ConfigData {
 	@ConfigEntry.Gui.TransitiveObject
 	public PaperDollConfig paperDollConfig = new PaperDollConfig();
 
+	@ConfigEntry.Category("hovering_hotbar")
+	@ConfigEntry.Gui.TransitiveObject
+	public HoveringHotbarConfig hoveringHotbarConfig = new HoveringHotbarConfig();
+
 	public static class SelectedItemConfig implements ConfigData {
 		@Comment("Disables held item tooltips for specified items and mods, mainly to prevent custom tooltips from overlapping.")
 		public String[] heldItemTooltipsBlacklist = new String[]{};
 
 		@ConfigEntry.BoundedDiscrete(min = 2, max = 7)
 		@Comment("Maximum amount of rows to be displayed for held item tooltips.")
-		public int heldItemTooltipsRows = 5;
+		public int rows = 5;
 
 		@Comment("Offset on x-axis from screen center.")
-		public int heldItemTooltipsXOffset = 0;
+		public int xOffset = 0;
 
 		@Comment("Offset on y-axis from screen center.")
-		public int heldItemTooltipsYOffset = 59;
+		public int yOffset = 59;
 
 		@Comment("Show three dots when the complete tooltip information can't be displayed like on Console Edition instead of the custom text.")
-		public boolean heldItemTooltipsDots = false;
+		public boolean dots = false;
 	}
 
 	public static class PaperDollConfig {
@@ -49,33 +56,42 @@ public class ModConfig implements ConfigData {
 		public int paperDollScale = 4;
 
 		@Comment("Offset on x-axis from original doll position.")
-		public int paperDollXOffset = 0;
+		public int xOffset = 0;
 
 		@Comment("Offset on y-axis from original doll position.")
-		public int paperDollYOffset = 0;
+		public int yOffset = 0;
 
 		@Comment("Always displays the paper doll, no matter what action the player is performing.")
-		public boolean paperDollAlways = false;
+		public boolean always = false;
 
 		@Comment("Enables the paper doll while the player is sprinting.")
-		public boolean paperDollSprinting = true;
+		public boolean sprinting = true;
 
 		@Comment("Enables the paper doll while the player is crouching.")
-		public boolean paperDollCrouching = true;
+		public boolean crouching = true;
 
 		@Comment("Displays the paper doll when the player is using creative mode flight.")
-		public boolean paperDollFlying = true;
+		public boolean flying = true;
 
 		@Comment("Shows the paper doll while the player is flying with an elytra.")
-		public boolean paperDollElytraFlying = true;
+		public boolean elytraFlying = true;
 
 		@Comment("Disables flame overlay on the HUD when on fire and displays the burning paper doll instead.")
-		public boolean paperDollBurning = false;
+		public boolean burning = false;
 
 		@Comment("Shows the paper doll while the player is riding any entity.")
-		public boolean paperDollRiding = false;
+		public boolean riding = false;
 
 		@Comment("Shows the paper doll while the player is in the swimming pose (e.g. crawling, swimming).")
-		public boolean paperDollSwimmingPose = true;
+		public boolean swimmingPose = true;
+	}
+
+	public static class HoveringHotbarConfig {
+
+		@Comment("Offset on x-axis from screen center.")
+		public int xOffset = 0;
+
+		@Comment("Offset on y-axis from screen bottom.")
+		public int yOffset = 18;
 	}
 }

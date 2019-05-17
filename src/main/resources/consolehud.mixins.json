@@ -1,13 +1,14 @@
 {
-	"required": true,
-	"package": "com.fuzs.consolehud.mixin",
-	"compatibilityLevel": "JAVA_8",
-	"client": [
-		"client.IngameHudAccessorMixin",
-		"client.IngameHudMixin"
-	],
-	"minVersion": "0.7.11",
-	"injectors": {
-		"defaultRequire": 1
-	}
+		"required": true,
+		"package": "com.fuzs.consolehud.mixin",
+		"compatibilityLevel": "JAVA_8",
+		"client": [
+				"client.gui.hud.InGameHudAccessorMixin",
+				"client.gui.hud.InGameHudMixin",
+				"client.gui.hud.DrawableHelperAccessorMixin"
+		],
+		"minVersion": "0.7.11",
+		"injectors": {
+				"defaultRequire": 1
+		}
 }
