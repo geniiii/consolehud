@@ -28,7 +28,6 @@ import java.util.List;
 
 public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 
-	private boolean vanillaHeldItemTooltips = false;
 	private final InGameHudAccessorMixin mixin = (InGameHudAccessorMixin) this;
 	private final EventHandler eventHandler = new EventHandler();
 
@@ -50,17 +49,13 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 				this.mixin.setHeldItemTooltipFade(40);
 			}
 
-			if (!this.vanillaHeldItemTooltips && this.mixin.getHeldItemTooltipFade() > 38) {
-				this.mixin.setHeldItemTooltipFade(0);
-			}
-
 			this.mixin.setCurrentStack(itemstack);
 		}
 	}
 
 	private void renderGameOverlayText() {
 		if (ConsoleHud.CLIENT.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
-			this.vanillaHeldItemTooltips = true;
+			ConsoleHud.CLIENT.options.heldItemTooltips = true;
 			return;
 		}
 
@@ -69,7 +64,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
 
 		if (flag) {
-			this.vanillaHeldItemTooltips = true;
+			ConsoleHud.CLIENT.options.heldItemTooltips = true;
 			return;
 		}
 
@@ -130,7 +125,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	 * Removes empty lines from a list of strings
 	 */
 	private List<String> removeEmptyLines(List<String> list) {
-		list.forEach(line -> list.removeIf(String::isEmpty));
+		list.removeIf(String::isEmpty);
 
 		return list;
 	}

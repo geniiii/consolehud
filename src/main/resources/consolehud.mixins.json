@@ -4,8 +4,7 @@
 		"compatibilityLevel": "JAVA_8",
 		"client": [
 				"client.gui.hud.InGameHudAccessorMixin",
-				"client.gui.hud.InGameHudMixin",
-				"client.gui.hud.DrawableHelperAccessorMixin"
+				"client.gui.hud.InGameHudMixin"
 		],
 		"minVersion": "0.7.11",
 		"injectors": {
