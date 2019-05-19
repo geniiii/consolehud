@@ -3,6 +3,7 @@
 		"id": "consolehud",
 		"version": "${version}",
 		"name": "ConsoleHUD",
+		"description": "Bringing over HUD features from Console Edition.",
 		"authors": [
 				"fuzs",
 				"geni"
@@ -10,7 +11,7 @@
 		"contact": {
 				"homepage": "https://minecraft.curseforge.com/projects/console-hud-fabric",
 				"sources": "https://github.com/polgaria/consolehud/",
-				"issues": "https://github.com/polgaria/consolehud//issues"
+				"issues": "https://github.com/polgaria/consolehud/issues"
 		},
 		"license": "Unlicense",
 		"environment": "client",
@@ -23,12 +24,15 @@
 				]
 		},
 		"mixins": [
-				"consolehud.mixins.json"
+				"consolehud.mixins.json",
+				"renderevents.mixins.json"
 		],
+		"icon": "assets/consolehud/icon.png",
 		"requires": {
 				"fabricloader": ">=0.4.0",
 				"fabric-resource-loader-v0": ">=0.1.0",
 				"fabric-events-lifecycle-v0": ">=0.1.0",
+				"fabric-api-base": ">=0.1.0",
 				"autoconfig1": ">=1.1.0",
 				"cloth-config": ">=0.2.1"
 		},

@@ -1,79 +1,72 @@
 package com.fuzs.consolehud.renders;
 
 import com.fuzs.consolehud.ConsoleHud;
+import com.fuzs.consolehud.util.ConsoleHudRender;
 import com.fuzs.consolehud.util.PaperDollPosition;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
 
-public class RenderPaperDoll {
-	private MinecraftClient minecraft;
+public class RenderPaperDoll implements ConsoleHudRender {
 	private int remainingTicks = 0;
 	private int remainingRidingTicks = 0;
 	private float rotationYawPrev;
 	private float renderYawOffsetPrev;
 	private float positionOnScreen;
 	private boolean wasActive;
+	private final EventHandler eventHandler = new EventHandler();
 
-	public RenderPaperDoll(MinecraftClient mcIn) {
-		minecraft = mcIn;
-	}
+	private void onClientTick() {
+		if (ConsoleHud.CLIENT.player != null && !ConsoleHud.CLIENT.isPaused() && ConsoleHud.CONFIG.paperDoll) {
+			final boolean sprinting = ConsoleHud.CLIENT.player.isSprinting() && ConsoleHud.CONFIG.paperDollConfig.paperDollSprinting;
+			final boolean crouching = ConsoleHud.CLIENT.player.isSneaking() && remainingRidingTicks == 0 && ConsoleHud.CONFIG.paperDollConfig.paperDollCrouching;
+			final boolean flying = ConsoleHud.CLIENT.player.abilities.flying && ConsoleHud.CONFIG.paperDollConfig.paperDollFlying;
+			final boolean elytra = ConsoleHud.CLIENT.player.isFallFlying() && ConsoleHud.CONFIG.paperDollConfig.paperDollElytraFlying;
+			final boolean burning = ConsoleHud.CLIENT.player.isOnFire() && ConsoleHud.CONFIG.paperDollConfig.paperDollBurning;
+			final boolean mounting = ConsoleHud.CLIENT.player.isRiding() && ConsoleHud.CONFIG.paperDollConfig.paperDollRiding;
+			final boolean swimmingPose = ConsoleHud.CLIENT.player.isInSwimmingPose() && ConsoleHud.CONFIG.paperDollConfig.paperDollSwimmingPose;
 
-	public void registerOnClientTickEvent() {
-		ClientTickCallback.EVENT.register(
-			event -> {
-				if (this.minecraft.player != null && !this.minecraft.isPaused() && ConsoleHud.CONFIG.paperDoll) {
-					final boolean sprinting = minecraft.player.isSprinting() && ConsoleHud.CONFIG.paperDollConfig.paperDollSprinting;
-					final boolean crouching = minecraft.player.isSneaking() && remainingRidingTicks == 0 && ConsoleHud.CONFIG.paperDollConfig.paperDollCrouching;
-					final boolean flying = minecraft.player.abilities.flying && ConsoleHud.CONFIG.paperDollConfig.paperDollFlying;
-					final boolean elytra = minecraft.player.isFallFlying() && ConsoleHud.CONFIG.paperDollConfig.paperDollElytraFlying;
-					final boolean burning = minecraft.player.isOnFire() && ConsoleHud.CONFIG.paperDollConfig.paperDollBurning;
-					final boolean mounting = minecraft.player.isRiding() && ConsoleHud.CONFIG.paperDollConfig.paperDollRiding;
-					final boolean swimmingPose = minecraft.player.isInSwimmingPose() && ConsoleHud.CONFIG.paperDollConfig.paperDollSwimmingPose;
-
-					if (ConsoleHud.CONFIG.paperDollConfig.paperDollAlways || crouching || sprinting || burning || elytra || flying || mounting || swimmingPose) {
-						remainingTicks = 20;
-					} else if (remainingTicks > 0) {
-						remainingTicks--;
-					}
-
-					if (minecraft.player.isRiding()) {
-						remainingRidingTicks = 10;
-					} else if (remainingRidingTicks > 0) {
-						remainingRidingTicks--;
-					}
-				}
+			if (ConsoleHud.CONFIG.paperDollConfig.paperDollAlways || crouching || sprinting || burning || elytra || flying || mounting || swimmingPose) {
+				remainingTicks = 20;
+			} else if (remainingTicks > 0) {
+				remainingTicks--;
 			}
-		);
+
+			if (ConsoleHud.CLIENT.player.isRiding()) {
+				remainingRidingTicks = 10;
+			} else if (remainingRidingTicks > 0) {
+				remainingRidingTicks--;
+			}
+		}
 	}
 
-	public void renderGameOverlayText(float partialTicks) {
-		if (this.minecraft.player != null && ConsoleHud.CONFIG.paperDoll) {
+	private void renderGameOverlayText(float partialTicks) {
+		if (ConsoleHud.CLIENT.player != null && ConsoleHud.CONFIG.paperDoll) {
 			positionOnScreen = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? 22.5F : -22.5F;
-			if (!minecraft.player.isInvisible() && !minecraft.player.isSpectator() && (!minecraft.player.isRiding() || ConsoleHud.CONFIG.paperDollConfig.paperDollRiding || ConsoleHud.CONFIG.paperDollConfig.paperDollAlways) && remainingTicks > 0) {
+			if (!ConsoleHud.CLIENT.player.isInvisible() && !ConsoleHud.CLIENT.player.isSpectator() && (!ConsoleHud.CLIENT.player.isRiding() || ConsoleHud.CONFIG.paperDollConfig.paperDollRiding || ConsoleHud.CONFIG.paperDollConfig.paperDollAlways) && remainingTicks > 0) {
 				if (!wasActive) {
 					rotationYawPrev = positionOnScreen;
-					renderYawOffsetPrev = minecraft.player.field_6283;
+					renderYawOffsetPrev = ConsoleHud.CLIENT.player.field_6283;
 					wasActive = true;
 				}
 
 				int scale = ConsoleHud.CONFIG.paperDollConfig.paperDollScale * 5;
 				int positionScale = (int) (scale * 1.5F);
 
-				int scaledWidth = this.minecraft.window.getScaledWidth();
-				int scaledHeight = this.minecraft.window.getScaledHeight();
+				int scaledWidth = ConsoleHud.CLIENT.window.getScaledWidth();
+				int scaledHeight = ConsoleHud.CLIENT.window.getScaledHeight();
 
-				int xMargin = ConsoleHud.CONFIG.paperDollConfig.paperDollXOffset / (int) this.minecraft.window.getScaleFactor();
-				int yMargin = ConsoleHud.CONFIG.paperDollConfig.paperDollYOffset / (int) this.minecraft.window.getScaleFactor();
+				int xMargin = ConsoleHud.CONFIG.paperDollConfig.paperDollXOffset / (int) ConsoleHud.CLIENT.window.getScaleFactor();
+				int yMargin = ConsoleHud.CONFIG.paperDollConfig.paperDollYOffset / (int) ConsoleHud.CLIENT.window.getScaleFactor();
 
 				int x = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? scaledWidth - positionScale - xMargin : positionScale + xMargin;
 				int y = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() % 2 == 0 ? (int) (scale * 2.5F) + yMargin : scaledHeight - positionScale - yMargin;
 
-				this.drawEntityOnScreen((x % scaledWidth + scaledWidth) % scaledWidth, (y % scaledHeight + scaledWidth) % scaledWidth, scale, minecraft.player, partialTicks);
+				this.drawEntityOnScreen((x % scaledWidth + scaledWidth) % scaledWidth, (y % scaledHeight + scaledWidth) % scaledWidth, scale, ConsoleHud.CLIENT.player, partialTicks);
 			} else if (wasActive) {
 				wasActive = false;
 			}
@@ -84,8 +77,7 @@ public class RenderPaperDoll {
 	 * Draws an entity on the screen looking toward the cursor.
 	 */
 	private void drawEntityOnScreen(int posX, int posY, int scale, ClientPlayerEntity playerEntity, float partialTicks) {
-		EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderManager();
-
+		EntityRenderDispatcher entityRenderDispatcher = ConsoleHud.CLIENT.getEntityRenderManager();
 		if (entityRenderDispatcher.camera != null) {
 			GlStateManager.enableDepthTest();
 			GlStateManager.enableColorMaterial();
@@ -159,5 +151,30 @@ public class RenderPaperDoll {
 		}
 
 		rotationYawPrev = Math.round(rotationYawPrev * 50F) / 50F;
+	}
+
+	@Override
+	public EventHandler getEventHandler() {
+		return this.eventHandler;
+	}
+
+	public final class EventHandler implements ConsoleHudRender.EventHandler {
+		private void registerClientTickEvent() {
+			ClientTickCallback.EVENT.register(
+				client -> RenderPaperDoll.this.onClientTick()
+			);
+		}
+
+		private void registerInGameHudDrawEvent() {
+			InGameHudDrawCallback.Pre.EVENT.register(
+				RenderPaperDoll.this::renderGameOverlayText
+			);
+		}
+
+		@Override
+		public void registerEvents() {
+			this.registerClientTickEvent();
+			this.registerInGameHudDrawEvent();
+		}
 	}
 }

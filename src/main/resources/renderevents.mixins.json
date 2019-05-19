@@ -1,10 +1,9 @@
 {
 		"required": true,
-		"package": "com.fuzs.consolehud.mixin",
+		"package": "site.geni.renderevents.mixin",
 		"compatibilityLevel": "JAVA_8",
 		"client": [
-				"client.gui.hud.InGameHudAccessorMixin",
-				"client.gui.hud.InGameHudMixin"
+				"client.InGameHudDrawMixin"
 		],
 		"minVersion": "0.7.11",
 		"injectors": {

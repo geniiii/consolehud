@@ -2,13 +2,13 @@ package com.fuzs.consolehud.renders;
 
 import com.fuzs.consolehud.ConsoleHud;
 import com.fuzs.consolehud.mixin.client.IngameHudAccessorMixin;
+import com.fuzs.consolehud.util.ConsoleHudRender;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.ChatFormat;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.Enchantment;
@@ -19,48 +19,43 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
 
 import java.util.List;
 
-public class RenderSelectedItem extends InGameHud {
-
-	private final MinecraftClient client;
+public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	private final IngameHudAccessorMixin mixin = (IngameHudAccessorMixin) this;
+	private final EventHandler eventHandler = new EventHandler();
 
-	public RenderSelectedItem(MinecraftClient mcIn) {
-		super(mcIn);
-
-		this.client = mcIn;
+	public RenderSelectedItem() {
+		super(ConsoleHud.CLIENT);
 	}
 
-	public void registerOnClientTickEvent() {
-		ClientTickCallback.EVENT.register(
-			event -> {
-				if (this.client.player != null && ConsoleHud.CONFIG.heldItemTooltips && !this.client.isPaused()) {
-					ItemStack itemstack = this.client.player.inventory.getMainHandStack();
+	private void onClientTick() {
+		if (ConsoleHud.CLIENT.player != null && ConsoleHud.CONFIG.heldItemTooltips && !ConsoleHud.CLIENT.isPaused()) {
+			ItemStack itemstack = ConsoleHud.CLIENT.player.inventory.getMainHandStack();
 
-					if (itemstack.isEmpty()) {
-						this.mixin.setHeldItemTooltipFade(0);
-					} else if (!this.mixin.getCurrentStack().isEmpty() && itemstack.getItem() == this.mixin.getCurrentStack().getItem() && ItemStack.areEqual(itemstack, this.mixin.getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == this.mixin.getCurrentStack().getDamage())) {
-						if (this.mixin.getHeldItemTooltipFade() > 0) {
-							this.mixin.setHeldItemTooltipFade(this.mixin.getHeldItemTooltipFade() - 1);
-						}
-					} else {
-						this.mixin.setHeldItemTooltipFade(40);
-					}
-
-					this.mixin.setCurrentStack(itemstack);
+			if (itemstack.isEmpty()) {
+				this.mixin.setHeldItemTooltipFade(0);
+			} else if (!this.mixin.getCurrentStack().isEmpty() && itemstack.getItem() == this.mixin.getCurrentStack().getItem() && ItemStack.areEqual(itemstack, this.mixin.getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == this.mixin.getCurrentStack().getDamage())) {
+				if (this.mixin.getHeldItemTooltipFade() > 0) {
+					this.mixin.setHeldItemTooltipFade(this.mixin.getHeldItemTooltipFade() - 1);
 				}
+			} else {
+				this.mixin.setHeldItemTooltipFade(40);
 			}
-		);
+
+			this.mixin.setCurrentStack(itemstack);
+		}
 	}
 
-	public void renderGameOverlayText() {
-		if (this.client.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
-			this.client.options.heldItemTooltips = true;
+	private void renderGameOverlayText() {
+		if (ConsoleHud.CLIENT.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
+			ConsoleHud.CLIENT.options.heldItemTooltips = true;
 			return;
 		}
 
@@ -69,18 +64,18 @@ public class RenderSelectedItem extends InGameHud {
 		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
 
 		if (flag) {
-			this.client.options.heldItemTooltips = true;
+			ConsoleHud.CLIENT.options.heldItemTooltips = true;
 			return;
 		}
 
 		if (this.mixin.getHeldItemTooltipFade() > 0 && !this.mixin.getCurrentStack().isEmpty()) {
-			int tooltipXPosition = this.client.window.getScaledWidth() / 2;
+			int tooltipXPosition = ConsoleHud.CLIENT.window.getScaledWidth() / 2;
 			tooltipXPosition += ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsXOffset % tooltipXPosition;
 
-			int tooltipYPosition = this.client.window.getScaledHeight();
+			int tooltipYPosition = ConsoleHud.CLIENT.window.getScaledHeight();
 			tooltipYPosition -= ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsYOffset % tooltipYPosition;
 
-			if (!this.client.interactionManager.hasStatusBars()) {
+			if (!ConsoleHud.CLIENT.interactionManager.hasStatusBars()) {
 				tooltipYPosition += 14;
 			}
 
@@ -117,7 +112,7 @@ public class RenderSelectedItem extends InGameHud {
 
 		}
 
-		this.client.options.heldItemTooltips = false;
+		ConsoleHud.CLIENT.options.heldItemTooltips = false;
 
 	}
 
@@ -125,7 +120,7 @@ public class RenderSelectedItem extends InGameHud {
 	 * Removes empty lines from a list of strings
 	 */
 	private List<String> removeEmptyLines(List<String> list) {
-		list.forEach(line -> list.removeIf(String::isEmpty));
+		list.removeIf(String::isEmpty);
 
 		return list;
 	}
@@ -135,11 +130,11 @@ public class RenderSelectedItem extends InGameHud {
 	 * will be coloured grey
 	 */
 	private List<String> getToolTipColour(ItemStack stack) {
-		List<String> list = removeEmptyLines(getTooltip(this.client.player, stack));
+		List<String> list = removeEmptyLines(getTooltip(ConsoleHud.CLIENT.player, stack));
 
 		for (int i = 0; i < list.size(); ++i) {
 			if (i == 0) {
-				list.set(i, stack.getRarity().formatting + list.get(i));
+				list.set(i, stack.getRarity().formatting + new TextComponent(list.get(i)).getFormattedText());
 			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
 				list.set(i, ChatFormat.GRAY + "..." + ChatFormat.RESET);
 			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
@@ -224,5 +219,30 @@ public class RenderSelectedItem extends InGameHud {
 			}
 		}
 		return list;
+	}
+
+	@Override
+	public EventHandler getEventHandler() {
+		return this.eventHandler;
+	}
+
+	public final class EventHandler implements ConsoleHudRender.EventHandler {
+		private void registerInGameHudDrawEvent() {
+			InGameHudDrawCallback.Pre.EVENT.register(
+				partialTicks -> RenderSelectedItem.this.renderGameOverlayText()
+			);
+		}
+
+		private void registerClientTickEvent() {
+			ClientTickCallback.EVENT.register(
+				client -> RenderSelectedItem.this.onClientTick()
+			);
+		}
+
+		@Override
+		public void registerEvents() {
+			this.registerClientTickEvent();
+			this.registerInGameHudDrawEvent();
+		}
 	}
 }
