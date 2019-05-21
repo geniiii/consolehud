@@ -44,7 +44,7 @@ public class RenderPaperDoll implements ConsoleHudRender {
 		}
 	}
 
-	private void renderGameOverlayText(float partialTicks) {
+	private void onInGameHudDraw(float partialTicks) {
 		if (ConsoleHud.CLIENT.player != null && ConsoleHud.CONFIG.paperDoll) {
 			positionOnScreen = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.ordinal() > PaperDollPosition.BOTTOM_LEFT.ordinal() ? 22.5F : -22.5F;
 			if (!ConsoleHud.CLIENT.player.isInvisible() && !ConsoleHud.CLIENT.player.isSpectator() && (!ConsoleHud.CLIENT.player.isRiding() || ConsoleHud.CONFIG.paperDollConfig.paperDollRiding || ConsoleHud.CONFIG.paperDollConfig.paperDollAlways) && remainingTicks > 0) {
@@ -83,20 +83,20 @@ public class RenderPaperDoll implements ConsoleHudRender {
 			GlStateManager.enableColorMaterial();
 			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float) posX, (float) posY, 50.0F);
-			GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
+			GlStateManager.translatef(posX, posY, 50.0F);
+			GlStateManager.scalef(-scale, scale, scale);
 			GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 
-			float f = playerEntity.field_6283;
-			float f1 = playerEntity.yaw;
-			float f2 = playerEntity.pitch;
-			float f3 = playerEntity.prevHeadYaw;
-			float f4 = playerEntity.headYaw;
+			final float f = playerEntity.field_6283;
+			final float f1 = playerEntity.yaw;
+			final float f2 = playerEntity.pitch;
+			final float f3 = playerEntity.prevHeadYaw;
+			final float f4 = playerEntity.headYaw;
 
 			GlStateManager.rotatef(135.0F, 0.0F, 1.0F, 0.0F);
 			GuiLighting.enable();
 			GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(-((float) Math.atan((double) (40 / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotatef(-((float) Math.atan(40 / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
 
 			this.rotateEntity(playerEntity.field_6283 - renderYawOffsetPrev, partialTicks);
 			renderYawOffsetPrev = playerEntity.field_6283;
@@ -167,7 +167,7 @@ public class RenderPaperDoll implements ConsoleHudRender {
 
 		private void registerInGameHudDrawEvent() {
 			InGameHudDrawCallback.Pre.EVENT.register(
-				RenderPaperDoll.this::renderGameOverlayText
+				RenderPaperDoll.this::onInGameHudDraw
 			);
 		}
 

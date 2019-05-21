@@ -53,7 +53,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 		}
 	}
 
-	private void renderGameOverlayText() {
+	private void onInGameHudDraw() {
 		if (ConsoleHud.CLIENT.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
 			ConsoleHud.CLIENT.options.heldItemTooltips = true;
 			return;
@@ -229,7 +229,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	public final class EventHandler implements ConsoleHudRender.EventHandler {
 		private void registerInGameHudDrawEvent() {
 			InGameHudDrawCallback.Pre.EVENT.register(
-				partialTicks -> RenderSelectedItem.this.renderGameOverlayText()
+				partialTicks -> RenderSelectedItem.this.onInGameHudDraw()
 			);
 		}
 
