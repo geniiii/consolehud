@@ -1,7 +1,7 @@
 package com.fuzs.consolehud.renders;
 
 import com.fuzs.consolehud.ConsoleHud;
-import com.fuzs.consolehud.mixin.client.IngameHudAccessorMixin;
+import com.fuzs.consolehud.mixin.client.gui.hud.InGameHudAccessorMixin;
 import com.fuzs.consolehud.util.ConsoleHudRender;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -27,8 +28,9 @@ import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
-	private final IngameHudAccessorMixin mixin = (IngameHudAccessorMixin) this;
+	private final InGameHudAccessorMixin mixin = (InGameHudAccessorMixin) this;
 	private final EventHandler eventHandler = new EventHandler();
 
 	public RenderSelectedItem() {
@@ -56,15 +58,16 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	private void onInGameHudDraw() {
 		if (ConsoleHud.CLIENT.player.isSpectator() || !ConsoleHud.CONFIG.heldItemTooltips) {
 			ConsoleHud.CLIENT.options.heldItemTooltips = true;
+
 			return;
 		}
 
-		Identifier resource = Registry.ITEM.getId(this.mixin.getCurrentStack().getItem());
-		List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsBlacklist);
-		boolean flag = blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace());
+		final Identifier resource = Registry.ITEM.getId(this.mixin.getCurrentStack().getItem());
+		final List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsBlacklist);
 
-		if (flag) {
+		if (blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace())) {
 			ConsoleHud.CLIENT.options.heldItemTooltips = true;
+
 			return;
 		}
 
@@ -88,7 +91,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 			if (k > 0) {
 				GlStateManager.pushMatrix();
 				GlStateManager.enableBlend();
-				List<String> textLines = getToolTipColour(this.mixin.getCurrentStack());
+				List<String> textLines = setTooltipColor(this.mixin.getCurrentStack());
 				int listSize = textLines.size();
 
 				if (listSize > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
@@ -119,7 +122,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	/**
 	 * Removes empty lines from a list of strings
 	 */
-	private List<String> removeEmptyLines(List<String> list) {
+	private List<String> removeEmptyLines(final List<String> list) {
 		list.removeIf(String::isEmpty);
 
 		return list;
@@ -129,29 +132,26 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	 * Colours first line in a list of strings according to its rarity, other lines that don't have a colour assigned
 	 * will be coloured grey
 	 */
-	private List<String> getToolTipColour(ItemStack stack) {
+	private List<String> setTooltipColor(final ItemStack stack) {
 		List<String> list = removeEmptyLines(getTooltip(ConsoleHud.CLIENT.player, stack));
 
-		for (int i = 0; i < list.size(); ++i) {
-			if (i == 0) {
-				list.set(i, stack.getRarity().formatting + new TextComponent(list.get(i)).getFormattedText());
-			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
-				list.set(i, ChatFormat.GRAY + "..." + ChatFormat.RESET);
-			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
-				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
-			} else if (i == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
-				list.set(i, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);
+		for (int index = 0; index < list.size(); ++index) {
+			if (index == 0) {
+				list.set(index, new TextComponent(list.get(index)).applyFormat(stack.getRarity().formatting).getFormattedText());
+			} else if (index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
+				list.set(index, ChatFormat.GRAY + "..." + ChatFormat.RESET);
+			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
+				list.set(index, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
+			} else if (index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
+				list.set(index, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);
 			} else {
-				list.set(i, ChatFormat.GRAY + list.get(i) + ChatFormat.RESET);
+				list.set(index, ChatFormat.GRAY + list.get(index) + ChatFormat.RESET);
 			}
 		}
 
 		return list;
 	}
 
-	/**
-	 * Returns the contents of the textbox as float
-	 */
 	private int getShulkerBoxExcess(String line) {
 		line = line.replaceAll("[^0-9]", "");
 		if (line.isEmpty()) {
@@ -163,9 +163,8 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	/**
 	 * Return a list of strings containing information about the item
 	 */
-	@Environment(EnvType.CLIENT)
-	private List<String> getTooltip(PlayerEntity playerIn, ItemStack stack) {
-		List<String> list = Lists.newArrayList();
+	private List<String> getTooltip(final PlayerEntity playerIn, final ItemStack stack) {
+		final List<String> list = Lists.newArrayList();
 		String itemName = stack.getDisplayName().getFormattedText();
 
 		if (stack.hasDisplayName()) {
@@ -173,23 +172,23 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 		}
 
 		if (!stack.hasDisplayName() && stack.getItem() == Items.FILLED_MAP) {
-			itemName = itemName + " #" + stack.getDamage();
+			itemName += " #" + stack.getDamage();
 		}
 
-		itemName = itemName + ChatFormat.RESET;
+		itemName += ChatFormat.RESET;
 		list.add(itemName);
 
-		List<Component> textComponentList = Lists.newArrayList();
+		final List<Component> textComponentList = Lists.newArrayList();
 		stack.getItem().buildTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
 		textComponentList.forEach(component -> list.add(component.getFormattedText()));
 
 		if (stack.hasTag()) {
-			ListTag enchantmentListTag = stack.getEnchantmentList();
+			final ListTag enchantmentListTag = stack.getEnchantmentList();
 
 			enchantmentListTag.forEach(tag -> {
-				CompoundTag compoundTag = (CompoundTag) tag;
-				String id = compoundTag.getString("id");
-				int lvl = compoundTag.getShort("lvl");
+				final CompoundTag compoundTag = (CompoundTag) tag;
+				final String id = compoundTag.getString("id");
+				final int lvl = compoundTag.getShort("lvl");
 				Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(id));
 
 				if (enchantment != null) {
@@ -201,18 +200,23 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 			// hasTag() already ensures that it's not null
 			// noinspection ConstantConditions
 			if (stack.getTag().containsKey("display", 10)) {
-				CompoundTag compoundTag = stack.getTag().getCompound("display");
+				final CompoundTag compoundTag = stack.getTag().getCompound("display");
 
 				if (compoundTag.containsKey("color", 3)) {
 					list.add(ChatFormat.ITALIC + new TranslatableComponent("item.dyed").getFormattedText());
 				}
 
 				if (compoundTag.getType("Lore") == 9) {
-					ListTag loreListTag = compoundTag.getList("Lore", 8);
+					final ListTag loreListTag = compoundTag.getList("Lore", 8);
 
 					if (!loreListTag.isEmpty()) {
 						for (Tag tag : loreListTag) {
-							list.add(ChatFormat.DARK_PURPLE + "" + ChatFormat.ITALIC + tag);
+							StringTag stringTag = (StringTag) tag;
+
+							Component lore = Component.Serializer.fromJsonString(stringTag.asString());
+							if (lore != null) {
+								list.add(lore.getFormattedText());
+							}
 						}
 					}
 				}
