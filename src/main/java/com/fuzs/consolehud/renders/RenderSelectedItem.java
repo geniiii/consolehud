@@ -4,6 +4,7 @@ import com.fuzs.consolehud.ConsoleHud;
 import com.fuzs.consolehud.mixin.client.gui.hud.InGameHudAccessorMixin;
 import com.fuzs.consolehud.util.ConsoleHudRender;
 import com.google.common.collect.Lists;
+import com.google.gson.stream.MalformedJsonException;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -211,12 +212,16 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 
 					if (!loreListTag.isEmpty()) {
 						for (Tag tag : loreListTag) {
-							StringTag stringTag = (StringTag) tag;
+								try {
+									StringTag stringTag = (StringTag) tag;
 
-							Component lore = Component.Serializer.fromJsonString(stringTag.asString());
-							if (lore != null) {
-								list.add(lore.getFormattedText());
-							}
+									Component lore = Component.Serializer.fromJsonString(stringTag.asString());
+									if (lore != null) {
+										list.add(lore.getFormattedText());
+									}
+								} catch (Exception e) {
+									list.add(tag.asString());
+								}
 						}
 					}
 				}
