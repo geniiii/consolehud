@@ -4,12 +4,10 @@ import com.fuzs.consolehud.ConsoleHud;
 import com.fuzs.consolehud.mixin.client.gui.hud.InGameHudAccessorMixin;
 import com.fuzs.consolehud.util.ConsoleHudRender;
 import com.google.common.collect.Lists;
-import com.google.gson.stream.MalformedJsonException;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.Enchantment;
@@ -20,9 +18,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
@@ -44,7 +43,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 
 			if (itemstack.isEmpty()) {
 				this.mixin.setHeldItemTooltipFade(0);
-			} else if (!this.mixin.getCurrentStack().isEmpty() && itemstack.getItem() == this.mixin.getCurrentStack().getItem() && ItemStack.areEqual(itemstack, this.mixin.getCurrentStack()) && (itemstack.hasDurability() || itemstack.getDamage() == this.mixin.getCurrentStack().getDamage())) {
+			} else if (!this.mixin.getCurrentStack().isEmpty() && itemstack.getItem() == this.mixin.getCurrentStack().getItem() && ItemStack.areEqualIgnoreDamage(itemstack, this.mixin.getCurrentStack()) && (itemstack.isDamageable() || itemstack.getDamage() == this.mixin.getCurrentStack().getDamage())) {
 				if (this.mixin.getHeldItemTooltipFade() > 0) {
 					this.mixin.setHeldItemTooltipFade(this.mixin.getHeldItemTooltipFade() - 1);
 				}
@@ -138,15 +137,15 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 
 		for (int index = 0; index < list.size(); ++index) {
 			if (index == 0) {
-				list.set(index, new TextComponent(list.get(index)).applyFormat(stack.getRarity().formatting).getFormattedText());
+				list.set(index, new LiteralText(list.get(index)).formatted(stack.getRarity().formatting).asFormattedString());
 			} else if (index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
-				list.set(index, ChatFormat.GRAY + "..." + ChatFormat.RESET);
+				list.set(index, Formatting.GRAY + "..." + Formatting.RESET);
 			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
-				list.set(index, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).getFormattedText()) + ChatFormat.RESET);
+				list.set(index, Formatting.GRAY + "" + Formatting.ITALIC + Formatting.strip(new TranslatableText("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).asFormattedString()) + Formatting.RESET);
 			} else if (index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
-				list.set(index, ChatFormat.GRAY + "" + ChatFormat.ITALIC + ChatFormat.stripFormatting(new TranslatableComponent("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).getFormattedText()) + ChatFormat.RESET);
+				list.set(index, Formatting.GRAY + "" + Formatting.ITALIC + Formatting.strip(new TranslatableText("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).asFormattedString()) + Formatting.RESET);
 			} else {
-				list.set(index, ChatFormat.GRAY + list.get(index) + ChatFormat.RESET);
+				list.set(index, Formatting.GRAY + list.get(index) + Formatting.RESET);
 			}
 		}
 
@@ -166,25 +165,25 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	 */
 	private List<String> getTooltip(final PlayerEntity playerIn, final ItemStack stack) {
 		final List<String> list = Lists.newArrayList();
-		String itemName = stack.getDisplayName().getFormattedText();
+		String itemName = stack.getName().asFormattedString();
 
-		if (stack.hasDisplayName()) {
-			itemName = ChatFormat.ITALIC + itemName;
+		if (stack.hasCustomName()) {
+			itemName = Formatting.ITALIC + itemName;
 		}
 
-		if (!stack.hasDisplayName() && stack.getItem() == Items.FILLED_MAP) {
+		if (!stack.hasCustomName() && stack.getItem() == Items.FILLED_MAP) {
 			itemName += " #" + stack.getDamage();
 		}
 
-		itemName += ChatFormat.RESET;
+		itemName += Formatting.RESET;
 		list.add(itemName);
 
-		final List<Component> textComponentList = Lists.newArrayList();
-		stack.getItem().buildTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
-		textComponentList.forEach(component -> list.add(component.getFormattedText()));
+		final List<Text> textComponentList = Lists.newArrayList();
+		stack.getItem().appendTooltip(stack, playerIn == null ? null : playerIn.world, textComponentList, TooltipContext.Default.NORMAL);
+		textComponentList.forEach(component -> list.add(component.asFormattedString()));
 
 		if (stack.hasTag()) {
-			final ListTag enchantmentListTag = stack.getEnchantmentList();
+			final ListTag enchantmentListTag = stack.getEnchantments();
 
 			enchantmentListTag.forEach(tag -> {
 				final CompoundTag compoundTag = (CompoundTag) tag;
@@ -193,7 +192,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 				Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(id));
 
 				if (enchantment != null) {
-					list.add(enchantment.getTextComponent(lvl).getFormattedText());
+					list.add(enchantment.getName(lvl).asFormattedString());
 				}
 			});
 
@@ -204,7 +203,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 				final CompoundTag compoundTag = stack.getTag().getCompound("display");
 
 				if (compoundTag.containsKey("color", 3)) {
-					list.add(ChatFormat.ITALIC + new TranslatableComponent("item.dyed").getFormattedText());
+					list.add(Formatting.ITALIC + new TranslatableText("item.dyed").asFormattedString());
 				}
 
 				if (compoundTag.getType("Lore") == 9) {
@@ -212,16 +211,16 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 
 					if (!loreListTag.isEmpty()) {
 						for (Tag tag : loreListTag) {
-								try {
-									StringTag stringTag = (StringTag) tag;
+							try {
+								StringTag stringTag = (StringTag) tag;
 
-									Component lore = Component.Serializer.fromJsonString(stringTag.asString());
-									if (lore != null) {
-										list.add(lore.getFormattedText());
-									}
-								} catch (Exception e) {
-									list.add(tag.asString());
+								Text lore = Text.Serializer.fromJson(stringTag.asString());
+								if (lore != null) {
+									list.add(lore.asFormattedString());
 								}
+							} catch (Exception e) {
+								list.add(tag.asString());
+							}
 						}
 					}
 				}
@@ -231,7 +230,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	}
 
 	@Override
-	public EventHandler getEventHandler() {
+	public com.fuzs.consolehud.renders.RenderSelectedItem.EventHandler getEventHandler() {
 		return this.eventHandler;
 	}
 

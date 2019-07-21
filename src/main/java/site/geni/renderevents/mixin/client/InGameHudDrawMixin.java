@@ -13,7 +13,7 @@ public abstract class InGameHudDrawMixin {
 		at = @At(
 			value = "HEAD"
 		),
-		method = "draw"
+		method = "render"
 	)
 	private void drawPre(float partialTicks, CallbackInfo ci) {
 		if (!ci.isCancelled()) {
@@ -25,7 +25,7 @@ public abstract class InGameHudDrawMixin {
 		at = @At(
 			value = "RETURN"
 		),
-		method = "draw"
+		method = "render"
 	)
 	private void drawPost(float partialTicks, CallbackInfo ci) {
 		if (!ci.isCancelled()) {

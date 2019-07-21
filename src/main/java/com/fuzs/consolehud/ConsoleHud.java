@@ -2,8 +2,7 @@ package com.fuzs.consolehud;
 
 import com.fuzs.consolehud.renders.RenderPaperDoll;
 import com.fuzs.consolehud.renders.RenderSelectedItem;
-import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1.serializer.JanksonConfigSerializer;
+import io.github.cottonmc.cotton.config.ConfigManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 
@@ -19,7 +18,7 @@ public class ConsoleHud implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ConsoleHud.CONFIG = AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new).getConfig();
+		ConsoleHud.CONFIG = ConfigManager.loadConfig(ModConfig.class);
 
 		ConsoleHud.RENDER_PAPER_DOLL.getEventHandler().registerEvents();
 		ConsoleHud.RENDER_SELECTED_ITEM.getEventHandler().registerEvents();
