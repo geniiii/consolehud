@@ -1,4 +1,4 @@
-package com.fuzs.consolehud.renders;
+package com.fuzs.consolehud.handler;
 
 import com.fuzs.consolehud.ConsoleHud;
 import com.fuzs.consolehud.helper.PaperDollHelper;
@@ -10,7 +10,7 @@ import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
 
 @Environment(EnvType.CLIENT)
-public class RenderPaperDoll implements ConsoleHudRender {
+public class PaperDollHandler implements ConsoleHudRender {
 	private final EventHandler eventHandler = new EventHandler();
 	private int remainingTicks = 0;
 	private int remainingRidingTicks = 0;
@@ -70,13 +70,13 @@ public class RenderPaperDoll implements ConsoleHudRender {
 	public final class EventHandler implements ConsoleHudRender.EventHandler {
 		private void registerClientTickEvent() {
 			ClientTickCallback.EVENT.register(
-				client -> RenderPaperDoll.this.onClientTick()
+				client -> PaperDollHandler.this.onClientTick()
 			);
 		}
 
 		private void registerInGameHudDrawEvent() {
 			InGameHudDrawCallback.Pre.EVENT.register(
-				RenderPaperDoll.this::onInGameHudDraw
+				PaperDollHandler.this::onInGameHudDraw
 			);
 		}
 

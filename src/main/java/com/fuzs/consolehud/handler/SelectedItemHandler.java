@@ -1,4 +1,4 @@
-package com.fuzs.consolehud.renders;
+package com.fuzs.consolehud.handler;
 
 import com.fuzs.consolehud.ConsoleHud;
 import com.fuzs.consolehud.mixin.client.gui.hud.InGameHudAccessorMixin;
@@ -29,11 +29,11 @@ import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
+public class SelectedItemHandler extends InGameHud implements ConsoleHudRender {
 	private final InGameHudAccessorMixin mixin = (InGameHudAccessorMixin) this;
 	private final EventHandler eventHandler = new EventHandler();
 
-	public RenderSelectedItem() {
+	public SelectedItemHandler() {
 		super(ConsoleHud.CLIENT);
 	}
 
@@ -230,20 +230,20 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 	}
 
 	@Override
-	public com.fuzs.consolehud.renders.RenderSelectedItem.EventHandler getEventHandler() {
+	public SelectedItemHandler.EventHandler getEventHandler() {
 		return this.eventHandler;
 	}
 
 	public final class EventHandler implements ConsoleHudRender.EventHandler {
 		private void registerInGameHudDrawEvent() {
 			InGameHudDrawCallback.Pre.EVENT.register(
-				partialTicks -> RenderSelectedItem.this.onInGameHudDraw()
+				partialTicks -> SelectedItemHandler.this.onInGameHudDraw()
 			);
 		}
 
 		private void registerClientTickEvent() {
 			ClientTickCallback.EVENT.register(
-				client -> RenderSelectedItem.this.onClientTick()
+				client -> SelectedItemHandler.this.onClientTick()
 			);
 		}
 
