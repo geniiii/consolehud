@@ -5,8 +5,6 @@ import net.fabricmc.fabric.api.event.EventFactory;
 
 public interface InGameHudDrawCallback {
 	interface Pre {
-		void draw(float partialTicks);
-
 		Event<InGameHudDrawCallback.Pre> EVENT = EventFactory.createArrayBacked(
 			InGameHudDrawCallback.Pre.class,
 			listeners -> partialTicks -> {
@@ -15,12 +13,12 @@ public interface InGameHudDrawCallback {
 				}
 			}
 		);
+
+		void draw(float partialTicks);
 	}
 
 
 	interface Post {
-		void draw(float partialTicks);
-
 		Event<InGameHudDrawCallback.Post> EVENT = EventFactory.createArrayBacked(
 			InGameHudDrawCallback.Post.class,
 			listeners -> partialTicks -> {
@@ -29,5 +27,7 @@ public interface InGameHudDrawCallback {
 				}
 			}
 		);
+
+		void draw(float partialTicks);
 	}
 }

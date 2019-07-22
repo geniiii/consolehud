@@ -7,10 +7,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 
 public class ConsoleHud implements ClientModInitializer {
-	static final String MODID = "consolehud";
-
 	public static final MinecraftClient CLIENT = MinecraftClient.getInstance();
-
+	static final String MODID = "consolehud";
 	private static final RenderPaperDoll RENDER_PAPER_DOLL = new RenderPaperDoll();
 	private static final RenderSelectedItem RENDER_SELECTED_ITEM = new RenderSelectedItem();
 

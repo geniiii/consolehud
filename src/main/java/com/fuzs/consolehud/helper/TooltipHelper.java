@@ -6,10 +6,10 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.command.arguments.BlockArgumentParser;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
@@ -24,6 +24,36 @@ import java.util.stream.Collectors;
 
 public class TooltipHelper extends TooltipElementsHelper {
 
+	static void getAdventureBlockInfo(List<Text> list, Style style, ListTag nbttaglist) {
+		for (int i = 0; i < nbttaglist.size(); i++) {
+			try {
+
+				BlockArgumentParser blockArgumentParser = new BlockArgumentParser(new StringReader(nbttaglist.getString(i)), true).parse(true);
+				BlockState blockstate = blockArgumentParser.getBlockState();
+				Identifier identifier = blockArgumentParser.getTagId();
+				boolean flag = blockstate != null;
+				boolean flag1 = identifier != null;
+
+				if (flag || flag1) {
+					if (flag) {
+						list.addAll(Lists.newArrayList(blockstate.getBlock().getName().setStyle(style)));
+					}
+
+					Tag<Block> tag = BlockTags.getContainer().get(identifier);
+					if (tag != null) {
+						Collection<Block> collection = tag.values();
+						if (!collection.isEmpty()) {
+							list.addAll(collection.stream().map(Block::getName).map(it -> it.setStyle(style)).collect(Collectors.toList()));
+						}
+					}
+				}
+
+			} catch (CommandSyntaxException ignored) {
+
+			}
+		}
+	}
+
 	public List<Text> createTooltip(ItemStack stack, boolean simple) {
 
 		this.itemstack = stack;
@@ -37,7 +67,7 @@ public class TooltipHelper extends TooltipElementsHelper {
 
 		this.getInformation(tooltip, new Style().setColor(ConsoleHud.CONFIG.heldItemTooltipsConfig.appearanceConfig.textColor.getChatColor()), TooltipContext.Default.ADVANCED, ConsoleHud.CLIENT.player.world);
 
-		if (stack.getItem() instanceof Items.SHULKER_BOX && tooltip.size() == ConsoleHud.CONFIG.heldItemTooltips.rows) {
+		if (Block.getBlockFromItem(stack.getItem()) instanceof ShulkerBoxBlock && tooltip.size() == ConsoleHud.CONFIG.heldItemTooltipsConfig.rows) {
 			return tooltip;
 		}
 
@@ -89,41 +119,6 @@ public class TooltipHelper extends TooltipElementsHelper {
 
 		if (j > 0 && ConsoleHud.CONFIG.heldItemTooltipsConfig.appearanceConfig.showLastLine) {
 			this.getLastLine(tooltip, new Style().setItalic(true).setColor(ConsoleHud.CONFIG.heldItemTooltipsConfig.appearanceConfig.textColor.getChatColor()), j);
-		}
-
-	}
-
-	@SuppressWarnings({"WeakerAccess", "ConstantConditions"})
-	protected static void getAdventureBlockInfo(List<Text> list, Style style, ListTag nbttaglist) {
-
-		for (int i = 0; i < nbttaglist.size(); i++) {
-
-			try {
-
-				BlockArgumentParser blockstateparser = new BlockArgumentParser(new StringReader(nbttaglist.getString(i)), true).parse(true);
-				BlockState blockstate = blockstateparser.getBlockState();
-				Identifier resourcelocation = blockstateparser.getTagId();
-				boolean flag = blockstate != null;
-				boolean flag1 = resourcelocation != null;
-
-				if (flag || flag1) {
-					if (flag) {
-						list.addAll(Lists.newArrayList(blockstate.getBlock().getName().setStyle(style)));
-					}
-
-					Tag<Block> tag = BlockTags.getContainer().get(resourcelocation);
-					if (tag != null) {
-						Collection<Block> collection = tag.values();
-						if (!collection.isEmpty()) {
-							list.addAll(collection.stream().map(Block::getName).map(it -> it.setStyle(style)).collect(Collectors.toList()));
-						}
-					}
-				}
-
-			} catch (CommandSyntaxException ignored) {
-
-			}
-
 		}
 
 	}

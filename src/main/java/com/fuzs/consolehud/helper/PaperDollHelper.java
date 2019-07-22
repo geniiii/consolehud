@@ -58,7 +58,7 @@ public class PaperDollHelper {
 			prevRotationYaw = 0;
 		}
 
-		playerEntity.field_6283 = playerEntity.headYaw = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition.getRotation(22.5F) + prevRotationYaw;
+		playerEntity.field_6283 = playerEntity.headYaw = ConsoleHud.CONFIG.paperDollConfig.position.getRotation(22.5F) + prevRotationYaw;
 
 		// do render
 		GlStateManager.translatef(0.0F, 0.0F, 0.0F);

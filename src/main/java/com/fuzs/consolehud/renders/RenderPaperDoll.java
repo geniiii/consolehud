@@ -11,10 +11,10 @@ import site.geni.renderevents.callbacks.client.InGameHudDrawCallback;
 
 @Environment(EnvType.CLIENT)
 public class RenderPaperDoll implements ConsoleHudRender {
+	private final EventHandler eventHandler = new EventHandler();
 	private int remainingTicks = 0;
 	private int remainingRidingTicks = 0;
 	private float rotationYawPrev;
-	private final EventHandler eventHandler = new EventHandler();
 
 	private void onClientTick() {
 		if (!ConsoleHud.CLIENT.isPaused() && ConsoleHud.CLIENT.player != null) {
@@ -42,13 +42,13 @@ public class RenderPaperDoll implements ConsoleHudRender {
 
 			if (!ConsoleHud.CLIENT.player.isInvisible() && !ConsoleHud.CLIENT.player.isSpectator() && ConsoleHud.CLIENT.options.perspective == 0 && riding && this.remainingTicks > 0) {
 
-				final int scale = ConsoleHud.CONFIG.paperDollConfig.paperDollScale * 5;
-				final PaperDollPosition position = ConsoleHud.CONFIG.paperDollConfig.paperDollPosition;
+				final int scale = ConsoleHud.CONFIG.paperDollConfig.scale * 5;
+				final PaperDollPosition position = ConsoleHud.CONFIG.paperDollConfig.position;
 
-				final int x = position.getX(0, ConsoleHud.CLIENT.window.getScaledWidth(), (int) (scale * 1.5F) + ConsoleHud.CONFIG.paperDollConfig.paperDollXOffset);
+				final int x = position.getX(0, ConsoleHud.CLIENT.window.getScaledWidth(), (int) (scale * 1.5F) + ConsoleHud.CONFIG.paperDollConfig.xOffset);
 
 				// can't use EnumPositionPreset#getY as the orientation point isn't in the top left corner of the image
-				final int yOffset = ConsoleHud.CONFIG.paperDollConfig.paperDollYOffset;
+				final int yOffset = ConsoleHud.CONFIG.paperDollConfig.yOffset;
 				int y = position.isBottom() ? ConsoleHud.CLIENT.window.getScaledHeight() - scale - yOffset : (int) (scale * 2.5F) + yOffset;
 
 				if (ConsoleHud.CONFIG.paperDollConfig.potionShift && position.shouldShift()) {

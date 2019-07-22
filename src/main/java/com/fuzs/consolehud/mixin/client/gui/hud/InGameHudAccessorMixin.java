@@ -11,10 +11,10 @@ public interface InGameHudAccessorMixin {
 	int getHeldItemTooltipFade();
 
 	@Accessor
-	ItemStack getCurrentStack();
+	void setHeldItemTooltipFade(int value);
 
 	@Accessor
-	void setHeldItemTooltipFade(int value);
+	ItemStack getCurrentStack();
 
 	@Accessor
 	void setCurrentStack(ItemStack value);

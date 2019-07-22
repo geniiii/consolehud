@@ -63,7 +63,7 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 		}
 
 		final Identifier resource = Registry.ITEM.getId(this.mixin.getCurrentStack().getItem());
-		final List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsBlacklist);
+		final List<String> blacklist = Lists.newArrayList(ConsoleHud.CONFIG.heldItemTooltipsConfig.blacklist);
 
 		if (blacklist.contains(resource.toString()) || blacklist.contains(resource.getNamespace())) {
 			ConsoleHud.CLIENT.options.heldItemTooltips = true;
@@ -73,10 +73,10 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 
 		if (this.mixin.getHeldItemTooltipFade() > 0 && !this.mixin.getCurrentStack().isEmpty()) {
 			int tooltipXPosition = ConsoleHud.CLIENT.window.getScaledWidth() / 2;
-			tooltipXPosition += ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsXOffset % tooltipXPosition;
+			tooltipXPosition += ConsoleHud.CONFIG.heldItemTooltipsConfig.xOffset % tooltipXPosition;
 
 			int tooltipYPosition = ConsoleHud.CLIENT.window.getScaledHeight();
-			tooltipYPosition -= ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsYOffset % tooltipYPosition;
+			tooltipYPosition -= ConsoleHud.CONFIG.heldItemTooltipsConfig.yOffset % tooltipYPosition;
 
 			if (!ConsoleHud.CLIENT.interactionManager.hasStatusBars()) {
 				tooltipYPosition += 14;
@@ -94,8 +94,8 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 				List<String> textLines = setTooltipColor(this.mixin.getCurrentStack());
 				int listSize = textLines.size();
 
-				if (listSize > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
-					listSize = ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows;
+				if (listSize > ConsoleHud.CONFIG.heldItemTooltipsConfig.rows) {
+					listSize = ConsoleHud.CONFIG.heldItemTooltipsConfig.rows;
 				}
 				tooltipYPosition -= listSize > 1 ? (listSize - 1) * 10 + 2 : (listSize - 1) * 10;
 
@@ -138,12 +138,12 @@ public class RenderSelectedItem extends InGameHud implements ConsoleHudRender {
 		for (int index = 0; index < list.size(); ++index) {
 			if (index == 0) {
 				list.set(index, new LiteralText(list.get(index)).formatted(stack.getRarity().formatting).asFormattedString());
-			} else if (index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows && ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsDots) {
+			} else if (index == ConsoleHud.CONFIG.heldItemTooltipsConfig.rows - 1 && list.size() > ConsoleHud.CONFIG.heldItemTooltipsConfig.rows) {
 				list.set(index, Formatting.GRAY + "..." + Formatting.RESET);
-			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1) {
-				list.set(index, Formatting.GRAY + "" + Formatting.ITALIC + Formatting.strip(new TranslatableText("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + getShulkerBoxExcess(list.get(6))).asFormattedString()) + Formatting.RESET);
-			} else if (index == ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows - 1 && list.size() > ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows) {
-				list.set(index, Formatting.GRAY + "" + Formatting.ITALIC + Formatting.strip(new TranslatableText("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.selectedItemConfig.heldItemTooltipsRows + 1).asFormattedString()) + Formatting.RESET);
+			} else if (stack.getItem().equals(Items.SHULKER_BOX) && list.size() == 7 && index == ConsoleHud.CONFIG.heldItemTooltipsConfig.rows - 1) {
+				list.set(index, Formatting.GRAY + "" + Formatting.ITALIC + Formatting.strip(new TranslatableText("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.heldItemTooltipsConfig.rows + getShulkerBoxExcess(list.get(6))).asFormattedString()) + Formatting.RESET);
+			} else if (index == ConsoleHud.CONFIG.heldItemTooltipsConfig.rows - 1 && list.size() > ConsoleHud.CONFIG.heldItemTooltipsConfig.rows) {
+				list.set(index, Formatting.GRAY + "" + Formatting.ITALIC + Formatting.strip(new TranslatableText("container.shulkerBox.more", list.size() - ConsoleHud.CONFIG.heldItemTooltipsConfig.rows + 1).asFormattedString()) + Formatting.RESET);
 			} else {
 				list.set(index, Formatting.GRAY + list.get(index) + Formatting.RESET);
 			}

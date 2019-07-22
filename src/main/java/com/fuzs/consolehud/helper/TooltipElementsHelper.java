@@ -1,5 +1,6 @@
 package com.fuzs.consolehud.helper;
 
+import com.fuzs.consolehud.ConsoleHud;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -30,9 +31,7 @@ public class TooltipElementsHelper {
 	protected ItemStack itemstack = ItemStack.EMPTY;
 
 	protected void getName(List<Text> list, Style style, TooltipContext tooltipflag) {
-
-		list.add(new LiteralText("").append(this.itemstack.getName()).setStyle(new Style().setItalic(this.itemstack.hasCustomName()).setColor(this.itemstack.getRarity().formatting)));
-
+		list.add(this.itemstack.getName().setStyle(new Style().setItalic(this.itemstack.hasCustomName()).setColor(this.itemstack.getRarity().formatting)));
 	}
 
 	protected void getInformation(List<Text> list, Style style, TooltipContext tooltipflag, World world) {
@@ -40,15 +39,11 @@ public class TooltipElementsHelper {
 		List<Text> information = Lists.newArrayList();
 
 		if (Block.getBlockFromItem(this.itemstack.getItem()) instanceof ShulkerBoxBlock) {
-
-			TooltipShulkerBoxHelper.getContentsTooltip(information, this.itemstack, style, ConfigHandler.HELD_ITEM_TOOLTIPS_CONFIG.rows.get() - 1);
-
+			TooltipShulkerBoxHelper.getContentsTooltip(information, this.itemstack, style, ConsoleHud.CONFIG.heldItemTooltipsConfig.rows - 1);
 		} else {
-
 			this.itemstack.getItem().appendTooltip(this.itemstack, world, information, tooltipflag);
 			// remove empty lines from a list of strings
 			information = information.stream().filter(it -> !Strings.isNullOrEmpty(it.getString())).collect(Collectors.toList());
-
 		}
 
 		list.addAll(information);
@@ -76,7 +71,7 @@ public class TooltipElementsHelper {
 
 	}
 
-	protected void getColorTag(List<String> list, Style style, TooltipContext tooltipflag) {
+	protected void getColorTag(List<Text> list, Style style, TooltipContext tooltipflag) {
 
 		if (this.itemstack.hasTag()) {
 			if (this.itemstack.getTag().containsKey("display", 10)) {
@@ -84,9 +79,9 @@ public class TooltipElementsHelper {
 
 				if (nbttagcompound.containsKey("color", 3)) {
 					if (tooltipflag.isAdvanced()) {
-						list.add(new TranslatableText("item.color", String.format(Locale.ROOT, "#%06X", nbttagcompound.getInt("color"))).setStyle(style).asFormattedString());
+						list.add(new TranslatableText("item.color", String.format(Locale.ROOT, "#%06X", nbttagcompound.getInt("color"))).setStyle(style));
 					} else {
-						list.add(new TranslatableText("item.dyed").setStyle(style.setItalic(true)).asFormattedString());
+						list.add(new TranslatableText("item.dyed").setStyle(style.setItalic(true)));
 					}
 				}
 			}
@@ -115,36 +110,28 @@ public class TooltipElementsHelper {
 	}
 
 	protected void getUnbreakable(List<Text> list, Style style) {
-
 		if (this.itemstack.hasTag() && this.itemstack.getTag().getBoolean("Unbreakable")) {
 			list.add(new TranslatableText("item.unbreakable").setStyle(style));
 		}
-
 	}
 
-	protected void getAdventureStats(List<String> list, Style style) {
-
+	protected void getAdventureStats(List<Text> list, Style style) {
 		if (this.itemstack.hasTag()) {
-
 			if (this.itemstack.getTag().containsKey("CanDestroy", 9)) {
-
 				ListTag nbttaglist1 = this.itemstack.getTag().getList("CanDestroy", 8);
 
 				if (!nbttaglist1.isEmpty()) {
-
-					list.add(new TranslatableText("item.canBreak").setStyle(style).asFormattedString());
+					list.add(new TranslatableText("item.canBreak").setStyle(style));
 
 					TooltipHelper.getAdventureBlockInfo(list, style, nbttaglist1);
 				}
 			}
 
 			if (this.itemstack.getTag().containsKey("CanPlaceOn", 9)) {
-
 				ListTag nbttaglist2 = this.itemstack.getTag().getList("CanPlaceOn", 8);
 
 				if (!nbttaglist2.isEmpty()) {
-
-					list.add(new TranslatableText("item.canPlace").setStyle(style).asFormattedString());
+					list.add(new TranslatableText("item.canPlace").setStyle(style));
 
 					TooltipHelper.getAdventureBlockInfo(list, style, nbttaglist2);
 				}
@@ -155,8 +142,7 @@ public class TooltipElementsHelper {
 	}
 
 	protected void getDurability(List<Text> list, Style style, boolean force) {
-
-		if ((!ConfigHandler.heldItemTooltipsConfig.appearanceConfig.showDurability || ConfigHandler.heldItemTooltipsConfig.appearanceConfig.forceDurability) && !force || !this.itemstack.isDamaged()) {
+		if ((!ConsoleHud.CONFIG.heldItemTooltipsConfig.appearanceConfig.showDurability || ConsoleHud.CONFIG.heldItemTooltipsConfig.appearanceConfig.forceDurability) && !force || !this.itemstack.isDamaged()) {
 			return;
 		}
 
@@ -166,26 +152,20 @@ public class TooltipElementsHelper {
 	}
 
 	protected void getNameID(List<Text> list, Style style) {
-
 		Identifier resource = Registry.ITEM.getId(this.itemstack.getItem());
 		if (resource != null) {
 			list.add(new LiteralText(resource.toString()).setStyle(style));
 		}
-
 	}
 
 	protected void getNBTAmount(List<Text> list, Style style) {
-
 		if (this.itemstack.hasTag()) {
 			list.add(new TranslatableText("item.nbt_tags", this.itemstack.getTag().getKeys().size()).setStyle(style));
 		}
-
 	}
 
 	protected void getLastLine(List<Text> list, Style style, int i) {
-
 		list.add(new TranslatableText("container.shulkerBox.more", i).setStyle(style));
-
 	}
 
 }

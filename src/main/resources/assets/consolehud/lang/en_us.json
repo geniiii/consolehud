@@ -1,18 +1,14 @@
 {
 		"text.autoconfig.consolehud.title": "ConsoleHUD Configuration",
-		
 		"text.autoconfig.consolehud.category.default": "General",
 		"text.autoconfig.consolehud.category.selected_item": "Held Item Tooltips",
 		"text.autoconfig.consolehud.category.paper_doll": "Paper Doll",
-
 		"text.autoconfig.consolehud.option.heldItemTooltips": "Held Item Tooltips",
 		"text.autoconfig.consolehud.option.paperDoll": "Paper Doll",
-		
 		"text.autoconfig.consolehud.option.selectedItemConfig.heldItemTooltipsRows": "Rows",
 		"text.autoconfig.consolehud.option.selectedItemConfig.heldItemTooltipsXOffset": "X-Offset",
 		"text.autoconfig.consolehud.option.selectedItemConfig.heldItemTooltipsYOffset": "Y-Offset",
 		"text.autoconfig.consolehud.option.selectedItemConfig.heldItemTooltipsDots": "Dots",
-		
 		"text.autoconfig.consolehud.option.paperDollConfig.paperDollPosition": "Position Preset",
 		"text.autoconfig.consolehud.option.paperDollConfig.paperDollScale": "Scale",
 		"text.autoconfig.consolehud.option.paperDollConfig.paperDollXOffset": "X-Offset",
