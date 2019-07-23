@@ -1,33 +1,36 @@
 package com.fuzs.consolehud;
 
-import blue.endless.jankson.Comment;
 import com.fuzs.consolehud.util.PaperDollPosition;
 import com.fuzs.consolehud.util.TextColor;
-import io.github.cottonmc.cotton.config.annotations.ConfigFile;
+import me.sargunvohra.mcmods.autoconfig1.ConfigData;
+import me.sargunvohra.mcmods.autoconfig1.annotation.Config;
+import me.sargunvohra.mcmods.autoconfig1.annotation.ConfigEntry;
+import me.sargunvohra.mcmods.autoconfig1.shadowed.blue.endless.jankson.Comment;
 
-@ConfigFile(name = ConsoleHud.MODID)
-public class ModConfig {
+@Config(name = ConsoleHud.MODID)
+public class ModConfig implements ConfigData {
 	@Comment("Enhances vanilla held item tooltips with information about enchantments, potions effects, shulker box contents, and more.")
 	public boolean heldItemTooltips = true;
 
 	@Comment("Shows a small player model in a configurable corner of the screen while the player is sprinting, sneaking, or flying.")
 	public boolean paperDoll = true;
 
-	/*@ConfigEntry.Category("selected_item")
-	@ConfigEntry.Gui.TransitiveObject*/
+	@ConfigEntry.Category("selected_item")
+	@ConfigEntry.Gui.TransitiveObject
 	public SelectedItemConfig heldItemTooltipsConfig = new SelectedItemConfig();
 
-	/*@ConfigEntry.Category("paper_doll")
-	@ConfigEntry.Gui.TransitiveObject*/
+	@ConfigEntry.Category("paper_doll")
+	@ConfigEntry.Gui.TransitiveObject
 	public PaperDollConfig paperDollConfig = new PaperDollConfig();
 
-	public static class SelectedItemConfig {
-		public AppearanceConfig appearanceConfig = new AppearanceConfig();
+	public static class SelectedItemConfig implements ConfigData {
+		@ConfigEntry.Gui.CollapsibleObject
+		public SelectedItemAppearanceConfig appearanceConfig = new SelectedItemAppearanceConfig();
 
 		@Comment("Disables held item tooltips for specified items and mods, mainly to prevent custom tooltips from overlapping.")
 		public String[] blacklist = new String[]{};
 
-		//@ConfigEntry.BoundedDiscrete(min = 2, max = 7)
+		@ConfigEntry.BoundedDiscrete(min = 2, max = 7)
 		@Comment("Maximum amount of rows to be displayed for held item tooltips.")
 		public int rows = 5;
 
@@ -37,14 +40,16 @@ public class ModConfig {
 		@Comment("Offset on y-axis from screen center.")
 		public int yOffset = 59;
 
+		@Comment("Amount of ticks the held item tooltip will be displayed for.")
+		public int displayTime = 40;
+
 		@Comment("Cache the tooltip so it doesn't have to be remade every tick. This will prevent it from updating stats like durability while it is displayed.")
 		public boolean cacheTooltip = true;
 
 		@Comment("Tie held item tooltips position to the hovering hotbar feature.")
 		public boolean tied = true;
 
-		public class AppearanceConfig {
-
+		public static class SelectedItemAppearanceConfig implements ConfigData {
 			@Comment("Enables tooltip information added by other mods like Hwyla to be displayed as a held item tooltip.")
 			public boolean moddedTooltips = false;
 
@@ -59,15 +64,14 @@ public class ModConfig {
 
 			@Comment("Default text color. Only applied when the text doesn't already have a color assigned internally.")
 			public TextColor textColor = TextColor.SILVER;
-
 		}
 	}
 
-	public static class PaperDollConfig {
+	public static class PaperDollConfig implements ConfigData {
 		@Comment("Defines a screen corner to display the paper doll in.")
 		public PaperDollPosition position = PaperDollPosition.TOP_LEFT;
 
-		//@ConfigEntry.BoundedDiscrete(min = 1, max = 24)
+		@ConfigEntry.BoundedDiscrete(min = 1, max = 24)
 		@Comment("Scale of the paper doll. This is additionally adjusted by the GUI Scale option in Video Settings.")
 		public int scale = 4;
 
@@ -86,11 +90,10 @@ public class ModConfig {
 		@Comment("Amount of ticks the paper doll will be kept on screen after its display conditions are no longer met. Obviously has no effect when the doll is always displayed.")
 		public int displayTime = 5;
 
-		/*@ConfigEntry.Category("display_actions_config")
-		@ConfigEntry.Gui.TransitiveObject*/
+		@ConfigEntry.Gui.CollapsibleObject
 		public DisplayActionsConfig displayActionsConfig = new DisplayActionsConfig();
 
-		public static class DisplayActionsConfig {
+		public static class DisplayActionsConfig implements ConfigData {
 			@Comment("Always displays the paper doll, no matter what action the player is performing.")
 			public boolean always = false;
 
@@ -114,7 +117,7 @@ public class ModConfig {
 
 			@Comment("Shows the paper doll while the player is in the swimming pose (e.g. crawling, swimming).")
 			public boolean swimmingPose = true;
-
 		}
 	}
+
 }
