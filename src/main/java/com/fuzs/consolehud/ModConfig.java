@@ -15,6 +15,9 @@ public class ModConfig implements ConfigData {
 	@Comment("Shows a small player model in a configurable corner of the screen while the player is sprinting, sneaking, or flying.")
 	public boolean paperDoll = true;
 
+	@Comment("Enables the hotbar to hover anywhere on the screen. By default, it moves it up 18px from its original position.")
+	public boolean hoveringHotbar = true;
+
 	@ConfigEntry.Category("selected_item")
 	@ConfigEntry.Gui.TransitiveObject
 	public SelectedItemConfig heldItemTooltipsConfig = new SelectedItemConfig();
@@ -22,6 +25,10 @@ public class ModConfig implements ConfigData {
 	@ConfigEntry.Category("paper_doll")
 	@ConfigEntry.Gui.TransitiveObject
 	public PaperDollConfig paperDollConfig = new PaperDollConfig();
+
+	@ConfigEntry.Category("hovering_hotbar")
+	@ConfigEntry.Gui.TransitiveObject
+	public HoveringHotbarConfig hoveringHotbarConfig = new HoveringHotbarConfig();
 
 	public static class SelectedItemConfig implements ConfigData {
 		@ConfigEntry.Gui.CollapsibleObject
@@ -120,4 +127,11 @@ public class ModConfig implements ConfigData {
 		}
 	}
 
+	public static class HoveringHotbarConfig implements ConfigData {
+		@Comment("Offset on x-axis from screen center.")
+		public int xOffset = 0;
+
+		@Comment("Offset on y-axis from screen bottom.")
+		public int yOffset = 18;
+	}
 }

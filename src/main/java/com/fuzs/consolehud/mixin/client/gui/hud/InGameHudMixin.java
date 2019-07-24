@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -17,7 +18,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,10 +76,10 @@ public abstract class InGameHudMixin {
 				posY += 14;
 			}
 
-			/*if (ConsoleHud.CONFIG.GENERAL_CONFIG.hoveringHotbar.get() && ConsoleHud.CONFIG.heldItemTooltipsConfig.tied.get()) {
-				posX += ConsoleHud.CONFIG.HOVERING_HOTBAR_CONFIG.xOffset.get();
-				posY -= ConsoleHud.CONFIG.HOVERING_HOTBAR_CONFIG.yOffset.get();
-			}*/
+			if (ConsoleHud.CONFIG.hoveringHotbar && ConsoleHud.CONFIG.heldItemTooltipsConfig.tied) {
+				posX += ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset;
+				posY -= ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset;
+			}
 
 			int alpha = (int) Math.min(255.0F, (float) this.heldItemTooltipFade * 256.0F / 10.0F);
 
@@ -97,9 +100,9 @@ public abstract class InGameHudMixin {
 				int size = this.tooltipCache.size();
 
 				// clears the action bar so it won't overlap with the tooltip
-				/*if (size > (ConsoleHud.CONFIG.hoveringHotbar ? 0 : 1)) {
-					this.client.player.sendStatusMessage(new LiteralText(""), true);
-				}*/
+				if (size > (ConsoleHud.CONFIG.hoveringHotbar ? 0 : 1)) {
+					this.client.player.addChatMessage(new LiteralText(""), true);
+				}
 
 				posY -= size > 1 ? (size - 1) * 10 + 2 : (size - 1) * 10;
 
@@ -119,4 +122,131 @@ public abstract class InGameHudMixin {
 			ci.cancel();
 		}
 	}
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;blit(IIIIII)V"
+			),
+			method = "renderHotbar"
+		)
+		private void drawHotbarOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;renderHotbarItem(IIFLnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;)V"
+			),
+			method = "renderHotbar"
+		)
+		private void drawHotbarItemsOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;blit(IIIIII)V"
+			),
+			method = "renderStatusBars"
+		)
+		private void drawStatusBarsOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;blit(IIIIII)V"
+			),
+			method = "renderExperienceBar"
+		)
+		private void drawExperienceBarOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/font/TextRenderer;draw(Ljava/lang/String;FFI)I"
+			),
+			method = "renderExperienceBar"
+		)
+		private void drawExperienceBarTextOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(1, (int) args.get(1) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(2, (int) args.get(2) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;fill(IIIII)V"
+			),
+			method = "renderHeldItemTooltip"
+		)
+		private void drawItemTooltipOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+				args.set(2, (int) args.get(2) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(3, (int) args.get(3) + ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Ljava/lang/String;FFI)I"
+			),
+			method = "renderHeldItemTooltip"
+		)
+		private void drawItemTooltipTextOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;blit(IIIIII)V"
+			),
+			method = "renderMountJumpBar"
+		)
+		private void drawMountJumpBarOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
+
+		@ModifyArgs(
+			at = @At(
+				value = "INVOKE",
+				target = "Lnet/minecraft/client/gui/hud/InGameHud;blit(IIIIII)V"
+			),
+			method = "renderMountHealth"
+		)
+		private void drawMountHealthOffset(Args args) {
+			if (ConsoleHud.CONFIG.hoveringHotbar) {
+				args.set(0, (int) args.get(0) + ConsoleHud.CONFIG.hoveringHotbarConfig.xOffset);
+				args.set(1, (int) args.get(1) - ConsoleHud.CONFIG.hoveringHotbarConfig.yOffset);
+			}
+		}
 }
