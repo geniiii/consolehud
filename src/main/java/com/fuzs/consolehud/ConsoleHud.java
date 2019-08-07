@@ -1,5 +1,6 @@
 package com.fuzs.consolehud;
 
+import com.fuzs.consolehud.handler.CoordinateDisplayHandler;
 import com.fuzs.consolehud.handler.PaperDollHandler;
 import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1.serializer.JanksonConfigSerializer;
@@ -8,8 +9,9 @@ import net.minecraft.client.MinecraftClient;
 
 public class ConsoleHud implements ClientModInitializer {
 	public static final MinecraftClient CLIENT = MinecraftClient.getInstance();
-	static final String MODID = "consolehud";
-	private static final PaperDollHandler RENDER_PAPER_DOLL = new PaperDollHandler();
+	public static final String MODID = "consolehud";
+	private static final PaperDollHandler PAPER_DOLL_HANDLER = new PaperDollHandler();
+	private static final CoordinateDisplayHandler COORDINATE_DISPLAY_HANDLER = new CoordinateDisplayHandler();
 
 	public static ModConfig CONFIG = null;
 
@@ -17,6 +19,7 @@ public class ConsoleHud implements ClientModInitializer {
 	public void onInitializeClient() {
 		ConsoleHud.CONFIG = AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new).getConfig();
 
-		ConsoleHud.RENDER_PAPER_DOLL.getEventHandler().registerEvents();
+		ConsoleHud.PAPER_DOLL_HANDLER.getEventHandler().registerEvents();
+		ConsoleHud.COORDINATE_DISPLAY_HANDLER.getEventHandler().registerEvents();
 	}
 }

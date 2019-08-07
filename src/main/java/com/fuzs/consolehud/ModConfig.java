@@ -18,6 +18,9 @@ public class ModConfig implements ConfigData {
 	@Comment("Enables the hotbar to hover anywhere on the screen. By default, it moves it up 18px from its original position.")
 	public boolean hoveringHotbar = true;
 
+	@Comment("Always show player coordinates on screen.")
+	public boolean coordinateDisplay = true;
+
 	@ConfigEntry.Category("selected_item")
 	@ConfigEntry.Gui.TransitiveObject
 	public SelectedItemConfig heldItemTooltipsConfig = new SelectedItemConfig();
@@ -29,6 +32,10 @@ public class ModConfig implements ConfigData {
 	@ConfigEntry.Category("hovering_hotbar")
 	@ConfigEntry.Gui.TransitiveObject
 	public HoveringHotbarConfig hoveringHotbarConfig = new HoveringHotbarConfig();
+
+	@ConfigEntry.Category("coordinate_display")
+	@ConfigEntry.Gui.TransitiveObject
+	public CoordinateDisplayConfig coordinateDisplayConfig = new CoordinateDisplayConfig();
 
 	public static class SelectedItemConfig implements ConfigData {
 		@ConfigEntry.Gui.CollapsibleObject
@@ -133,5 +140,27 @@ public class ModConfig implements ConfigData {
 
 		@Comment("Offset on y-axis from screen bottom.")
 		public int yOffset = 18;
+	}
+
+	public static class CoordinateDisplayConfig implements ConfigData {
+		//@Config.Name("X-Offset")
+		@Comment("Offset on x-axis from screen left.")
+		public int xOffset = 0;
+
+		//@Config.Name("Y-Offset")
+		@Comment("Offset on y-axis from top.")
+		public int yOffset = 60;
+
+		//@Config.Name("Show Background")
+		@Comment("Show black chat background behind coordinate display for better visibility.")
+		public boolean background = true;
+
+		//@Config.Name("Decimal Places")
+		@Comment("Amount of decimal places for the three coordinates.")
+		public int decimalPlaces = 0;
+
+		//@Config.Name("Background Border")
+		@Comment("Thickness of the background border in pixels. Only has an effect when \"Show Background\" is enabled.")
+		public int backgroundBorder = 2;
 	}
 }
